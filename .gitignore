@@ -1,0 +1,23 @@
+## Backend
+Backend/bin/
+Backend/obj/
+Backend/*.db
+Backend/*.db-shm
+Backend/*.db-wal
+
+## Node
+node_modules/
+package-lock.json
+yarn.lock
+
+## IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+## Environment
+.env
+.env.local

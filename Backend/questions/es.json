@@ -1,0 +1,58 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "text": "¿Cuál es tu nombre?",
+      "category": "personal",
+      "person": "woman"
+    },
+    {
+      "id": 2,
+      "text": "¿Cuál es tu edad?",
+      "category": "personal",
+      "person": "woman"
+    },
+    {
+      "id": 3,
+      "text": "¿Cuál es tu salario mensual?",
+      "category": "financial",
+      "person": "woman"
+    },
+    {
+      "id": 4,
+      "text": "¿Cuál es tu nombre?",
+      "category": "personal",
+      "person": "man"
+    },
+    {
+      "id": 5,
+      "text": "¿Cuál es tu edad?",
+      "category": "personal",
+      "person": "man"
+    },
+    {
+      "id": 6,
+      "text": "¿Cuál es tu salario mensual?",
+      "category": "financial",
+      "person": "man"
+    },
+    {
+      "id": 7,
+      "text": "¿Cuál es la etiqueta del gasto (ej. Vivienda, Comida, Transporte)?",
+      "category": "expenses",
+      "person": "shared"
+    },
+    {
+      "id": 8,
+      "text": "¿Cuál es la cantidad mensual para este gasto?",
+      "category": "expenses",
+      "person": "shared"
+    },
+    {
+      "id": 9,
+      "text": "¿Quién pagó este gasto (mujer, hombre o compartido)?",
+      "category": "expenses",
+      "person": "shared"
+    }
+  ]
+}
