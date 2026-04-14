@@ -377,60 +377,6 @@ Response to Frontend
 Update UI (chat + dashboard)
 ```
 
-## 🔐 How Language Switching Works
-
-```
-User clicks flag emoji (e.g., 🇫🇷)
-    ↓
-changeLanguage('fr') called
-    ↓
-i18next.changeLanguage('fr')
-    ↓
-updateUILanguage() → All [data-i18n] elements updated
-    ↓
-POST /api/bot/language/fr
-    ↓
-Backend loads questions/fr.json
-    ↓
-User gets next question → Now in French!
-```
-
-## 🐛 Common Issues & Solutions
-
-**Issue: Questions appear in English after language switch**
-- Solution: Ensure `Backend/questions/{language}.json` exists
-- Check browser console for API errors
-- Verify backend is running and accessible
-
-**Issue: Language resets to English after a few seconds**
-- Solution: This is now fixed with `ensureLanguagePersistence()`
-- Check that i18n.js is properly loaded
-
-**Issue: Data not showing in dashboard**
-- Solution: Verify backend is running on localhost:5000
-- Check browser Network tab for failed requests
-- Ensure database file `Backend/chat.db` exists
-
-**Issue: Inline editing not working**
-- Solution: Click exactly on the cell content
-- Check browser console for JavaScript errors
-- Verify amount field contains numbers only
-
-## 📝 Development Notes
-
-### Adding a New Language
-1. Create `Backend/questions/{lang}.json` with 9 questions
-2. Create `Frontend/locales/{lang}.json` with all translations
-3. No code changes needed - app auto-detects
-
-### Modifying Questions
-Edit `Backend/questions/en.json`, then create copies for other languages
-
-### Styling
-All CSS is in `Frontend/style.css` - no external stylesheets or CSS frameworks
-
-### Testing
-Use `Frontend/test.js` for utilities and debug helpers
 
 ## 📄 License
 

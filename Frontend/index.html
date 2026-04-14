@@ -58,13 +58,15 @@
         <!-- Right: Chat Window -->
         <div class="chat-window">
             <div class="chat-header">
-                <h2 data-i18n="chat.title">💬 Chat</h2>
-                <div id="controls" style="display: flex; gap: 8px;">
+                <div class="chat-header-top">
+                    <h2 data-i18n="chat.title">💬 Chat</h2>
+                    <span id="connection-status" class="status online" data-i18n="chat.online">● Online</span>
+                </div>
+                <div id="controls">
                     <button id="woman-btn" class="control-btn" style="background: #ff69b4; color: white;" data-i18n="buttons.womanQuestions">👩 Woman's Questions</button>
                     <button id="man-btn" class="control-btn" style="background: #4169e1; color: white;" data-i18n="buttons.manQuestions">👨 Man's Questions</button>
                     <button id="expenses-btn" class="control-btn" style="background: #ff9800; color: white;" data-i18n="buttons.addExpenses">💰 Add Expenses</button>
                 </div>
-                <span id="connection-status" class="status online" data-i18n="chat.online">● Online</span>
             </div>
 
             <div id="chat-messages" class="chat-messages">
@@ -79,7 +81,7 @@
                     placeholder="Type your message..." 
                     autocomplete="off"
                 >
-                <button id="send-btn" onclick="sendMessage()" data-i18n="chat.sendButton">Send</button>
+                <button id="send-btn" onclick="ChatInputHandler.sendMessage()" data-i18n="chat.sendButton">Send</button>
             </div>
         </div>
     </div>
@@ -87,6 +89,17 @@
     <script src="i18n.js"></script>
     <script src="sync.js"></script>
     <script src="dashboard.js"></script>
+    
+    <!-- State and Managers -->
+    <script src="managers/chatState.js"></script>
+    <script src="managers/messageManager.js"></script>
+    <script src="managers/dashboardManager.js"></script>
+    <script src="managers/expenseManager.js"></script>
+    <script src="managers/botManager.js"></script>
+    <script src="managers/uiManager.js"></script>
+    <script src="managers/chatInputHandler.js"></script>
+    
+    <!-- Main Controller -->
     <script src="chat.js"></script>
     
     <script>

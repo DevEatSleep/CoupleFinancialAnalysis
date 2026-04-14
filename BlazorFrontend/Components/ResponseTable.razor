@@ -1,0 +1,140 @@
+@using BlazorFrontend.Services
+@using BlazorFrontend.Models
+@inject ChatState State
+@inject ApiClient Api
+@inject LocalizationService Loc
+@implements IDisposable
+
+<table class="responses-table">
+    <thead>
+        <tr>
+            <th>@Loc.T("dashboard.person")</th>
+            <th>@Loc.T("dashboard.firstName")</th>
+            <th>@Loc.T("dashboard.age")</th>
+            <th>@Loc.T("dashboard.salary")</th>
+            <th>@Loc.T("dashboard.actions")</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!HasData)
+        {
+            <tr><td colspan="5" class="empty-state">@Loc.T("dashboard.noResponses")</td></tr>
+        }
+        else
+        {
+            @if (HasWomanData)
+            {
+                <tr>
+                    <td><strong>👩 @Loc.T("person.woman")</strong></td>
+                    <td class="editable" @onclick="() => StartEdit(State.WomanData.NameId, State.WomanData.Name)">
+                        @(IsEditing(State.WomanData.NameId) ? "" : DisplayWomanName)
+                        @if (IsEditing(State.WomanData.NameId))
+                        {
+                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                        }
+                    </td>
+                    <td class="editable" @onclick="() => StartEdit(State.WomanData.AgeId, State.WomanData.Age)">
+                        @(IsEditing(State.WomanData.AgeId) ? "" : State.WomanData.Age)
+                        @if (IsEditing(State.WomanData.AgeId))
+                        {
+                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                        }
+                    </td>
+                    <td class="editable" @onclick="() => StartEdit(State.WomanData.SalaryId, State.WomanData.Salary)">
+                        @(IsEditing(State.WomanData.SalaryId) ? "" : State.WomanData.Salary)
+                        @if (IsEditing(State.WomanData.SalaryId))
+                        {
+                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                        }
+                    </td>
+                    <td>
+                        <button class="delete-btn" @onclick="() => DeleteResponse(State.WomanData.NameId)">🗑️</button>
+                    </td>
+                </tr>
+            }
+            @if (HasManData)
+            {
+                <tr>
+                    <td><strong>👨 @Loc.T("person.man")</strong></td>
+                    <td class="editable" @onclick="() => StartEdit(State.ManData.NameId, State.ManData.Name)">
+                        @(IsEditing(State.ManData.NameId) ? "" : DisplayManName)
+                        @if (IsEditing(State.ManData.NameId))
+                        {
+                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                        }
+                    </td>
+                    <td class="editable" @onclick="() => StartEdit(State.ManData.AgeId, State.ManData.Age)">
+                        @(IsEditing(State.ManData.AgeId) ? "" : State.ManData.Age)
+                        @if (IsEditing(State.ManData.AgeId))
+                        {
+                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                        }
+                    </td>
+                    <td class="editable" @onclick="() => StartEdit(State.ManData.SalaryId, State.ManData.Salary)">
+                        @(IsEditing(State.ManData.SalaryId) ? "" : State.ManData.Salary)
+                        @if (IsEditing(State.ManData.SalaryId))
+                        {
+                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                        }
+                    </td>
+                    <td>
+                        <button class="delete-btn" @onclick="() => DeleteResponse(State.ManData.NameId)">🗑️</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    private int? _editingId;
+    private string EditValue { get; set; } = "";
+
+    private string DisplayWomanName => State.FirstNames.TryGetValue("woman", out var n) ? n : State.WomanData.Name;
+    private string DisplayManName => State.FirstNames.TryGetValue("man", out var n) ? n : State.ManData.Name;
+
+    private bool HasWomanData => State.WomanData.Name != "-" || State.WomanData.Age != "-" || State.WomanData.Salary != "-";
+    private bool HasManData => State.ManData.Name != "-" || State.ManData.Age != "-" || State.ManData.Salary != "-";
+    private bool HasData => HasWomanData || HasManData;
+
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+        Loc.OnLanguageChanged += () => InvokeAsync(StateHasChanged);
+    }
+
+    private bool IsEditing(int? id) => id is not null && _editingId == id;
+
+    private void StartEdit(int? id, string currentValue)
+    {
+        if (id is null) return;
+        _editingId = id;
+        EditValue = currentValue;
+    }
+
+    private async Task SaveEdit()
+    {
+        if (_editingId is not null && !string.IsNullOrWhiteSpace(EditValue))
+        {
+            await Api.UpdateResponseAsync(_editingId.Value, EditValue);
+        }
+        _editingId = null;
+    }
+
+    private async Task HandleEditKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SaveEdit();
+        if (e.Key == "Escape") _editingId = null;
+    }
+
+    private async Task DeleteResponse(int? id)
+    {
+        if (id is null) return;
+        await Api.DeleteResponseAsync(id.Value);
+    }
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
+    }
+}
