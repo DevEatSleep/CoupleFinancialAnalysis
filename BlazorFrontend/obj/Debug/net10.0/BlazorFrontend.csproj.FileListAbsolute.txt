@@ -218,9 +218,6 @@ C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Deb
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\icudt_CJK.tjcz0u77k5.dat
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\icudt_EFIGS.tptq2av103.dat
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\icudt_no_CJK.lfu7j35m59.dat
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\BlazorFrontend.pqmnbi24le.wasm
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\BlazorFrontend.ah04c2ow6k.pdb
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\dotnet.qijrvmnwyc.js
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\blazor.webassembly.66stpp682q.js.gz
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\Microsoft.AspNetCore.Authorization.roqc1km2rj.wasm.gz
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\Microsoft.AspNetCore.Components.uddsvpv1sv.wasm.gz
@@ -430,9 +427,6 @@ C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Deb
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\icudt_CJK.tjcz0u77k5.dat.gz
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\icudt_EFIGS.tptq2av103.dat.gz
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\icudt_no_CJK.lfu7j35m59.dat.gz
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\BlazorFrontend.pqmnbi24le.wasm.gz
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\BlazorFrontend.ah04c2ow6k.pdb.gz
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\dotnet.qijrvmnwyc.js.gz
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\BlazorFrontend.staticwebassets.runtime.json
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\BlazorFrontend.staticwebassets.endpoints.json
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\BlazorFrontend.dll
@@ -1069,10 +1063,6 @@ C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Deb
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\uoih2pa7hs-{0}-tjcz0u77k5-tjcz0u77k5.gz
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\105cqz456k-{0}-tptq2av103-tptq2av103.gz
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\vqp517prkk-{0}-lfu7j35m59-lfu7j35m59.gz
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\1poq0ruf3u-{0}-pqmnbi24le-pqmnbi24le.gz
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\yvx3z5ytng-{0}-ah04c2ow6k-ah04c2ow6k.gz
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\aqg0lfiyb7-{0}-qijrvmnwyc-qijrvmnwyc.gz
-C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\e80gg0wza1-{0}-n5zz66pa3i-n5zz66pa3i.gz
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\staticwebassets.build.json
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\staticwebassets.build.json.cache
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\staticwebassets.development.json
@@ -1083,3 +1073,13 @@ C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Deb
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\refint\BlazorFrontend.dll
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\BlazorFrontend.pdb
 C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\ref\BlazorFrontend.dll
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\BlazorFrontend.o9hely7zlm.wasm
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\BlazorFrontend.5ocwkn7z63.pdb
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\dotnet.jtmw2yi3vx.js
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\BlazorFrontend.o9hely7zlm.wasm.gz
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\BlazorFrontend.5ocwkn7z63.pdb.gz
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\bin\Debug\net10.0\wwwroot\_framework\dotnet.jtmw2yi3vx.js.gz
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\1poq0ruf3u-{0}-o9hely7zlm-o9hely7zlm.gz
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\yvx3z5ytng-{0}-5ocwkn7z63-5ocwkn7z63.gz
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\aqg0lfiyb7-{0}-jtmw2yi3vx-jtmw2yi3vx.gz
+C:\Users\VerdierThierry\Documents\CoupleFinancialAnalysis\BlazorFrontend\obj\Debug\net10.0\compressed\e80gg0wza1-{0}-6wtyenr90e-6wtyenr90e.gz
