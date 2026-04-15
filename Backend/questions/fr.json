@@ -53,6 +53,54 @@
       "text": "Qui a payé cette dépense (femme, homme ou partagé)?",
       "category": "expenses",
       "person": "shared"
+    },
+    {
+      "id": 10,
+      "text": "Cuisine & ménage – combien d’heures par semaine consacrez-vous à cette tâche? (Référence INSEE: femme ~15.75h, homme ~9.5h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 11,
+      "text": "Soins aux enfants – combien d’heures par semaine? (Référence INSEE: femme ~8.17h, homme ~4.67h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 12,
+      "text": "Courses alimentaires – combien d’heures par semaine? (Référence INSEE: femme ~3.47h, homme ~3h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 13,
+      "text": "Bricolage & jardinage – combien d’heures par semaine? (Référence INSEE: femme ~1.43h, homme ~3.79h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 14,
+      "text": "Cuisine & ménage – combien d’heures par semaine consacrez-vous à cette tâche? (Référence INSEE: femme ~15.75h, homme ~9.5h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 15,
+      "text": "Soins aux enfants – combien d’heures par semaine? (Référence INSEE: femme ~8.17h, homme ~4.67h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 16,
+      "text": "Courses alimentaires – combien d’heures par semaine? (Référence INSEE: femme ~3.47h, homme ~3h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 17,
+      "text": "Bricolage & jardinage – combien d’heures par semaine? (Référence INSEE: femme ~1.43h, homme ~3.79h)",
+      "category": "travail_domestique",
+      "person": "man"
     }
   ]
 }

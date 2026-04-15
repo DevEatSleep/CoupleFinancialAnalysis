@@ -34,7 +34,9 @@ CoupleFinancialAnalysis/
 ├── Backend/                      # ASP.NET Core 10 REST API
 │   ├── Controllers/
 │   │   ├── BotController.cs      # Bot Q&A, responses, expenses, language endpoints
-│   │   └── ChatController.cs     # Chat messaging
+│   │   ├── ChatController.cs     # Chat messaging
+│   │   ├── ReferenceController.cs # Dictionary/reference data
+│   │   └── DomestiqueController.cs # Household work tracking
 │   ├── Services/
 │   │   ├── BotService.cs         # Question management (multi-language support)
 │   │   └── NlpProcessor.cs       # Tag/value extraction from responses
@@ -42,29 +44,52 @@ CoupleFinancialAnalysis/
 │   │   ├── Message.cs
 │   │   ├── Response.cs
 │   │   ├── Expense.cs
-│   │   └── BotRequest.cs
+│   │   ├── BotRequest.cs
+│   │   └── DomestiqueResponse.cs  # Household work declarations
 │   ├── Data/
 │   │   └── ChatDbContext.cs      # EF Core DbContext
 │   ├── questions/                # Language-specific question files
-│   │   ├── en.json               # English questions (9 questions)
-│   │   ├── fr.json               # French questions (9 questions)
-│   │   └── es.json               # Spanish questions (9 questions)
+│   │   ├── en.json               # English questions
+│   │   ├── fr.json               # French questions
+│   │   └── es.json               # Spanish questions
 │   ├── questions.json            # Default/fallback questions
 │   ├── Program.cs
 │   └── CoupleChat.csproj
 │
-├── Frontend/                     # HTML/CSS/JavaScript PWA
-│   ├── index.html               # Main UI with i18n data attributes
-│   ├── style.css                # Responsive styling
-│   ├── chat.js                  # Chat, Q&A, expense tracking, inline editing
-│   ├── dashboard.js             # Dashboard initialization
-│   ├── sync.js                  # LocalStorage management
-│   ├── i18n.js                  # i18next initialization and language switching
-│   ├── locales/                 # Translation files (300+ strings per language)
-│   │   ├── en.json              # English translations
-│   │   ├── fr.json              # French translations
-│   │   └── es.json              # Spanish translations
-│   └── test.js                  # Testing utilities
+├── Frontend/                     # Blazor WebAssembly Frontend
+│   ├── Pages/
+│   │   ├── Home.razor            # Main dashboard page
+│   │   └── NotFound.razor        # 404 page
+│   ├── Components/
+│   │   ├── ExpenseTable.razor    # Expense tracking table
+│   │   ├── ResponseTable.razor   # Q&A responses table
+│   │   ├── DomestiqueTable.razor # Household work tracking table
+│   │   └── LanguageSelector.razor # Language switcher
+│   ├── Services/
+│   │   ├── ApiClient.cs          # REST API client
+│   │   ├── BotService.cs         # Bot logic and question management
+│   │   ├── ChatState.cs          # State management
+│   │   ├── LocalizationService.cs # i18n support
+│   │   └── PollingService.cs     # Real-time data polling
+│   ├── Models/
+│   │   ├── BotQuestion.cs
+│   │   ├── BotResponse.cs
+│   │   ├── Expense.cs
+│   │   ├── Message.cs
+│   │   ├── PersonData.cs
+│   │   └── DomestiqueResponse.cs
+│   ├── wwwroot/
+│   │   ├── index.html
+│   │   ├── css/
+│   │   │   └── app.css
+│   │   └── locales/              # Translation files
+│   │       ├── en.json           # English translations
+│   │       ├── fr.json           # French translations
+│   │       └── es.json           # Spanish translations
+│   ├── Program.cs
+│   ├── App.razor
+│   ├── _Imports.razor
+│   └── Frontend.csproj
 │
 ├── start.sh                      # Linux startup script
 ├── start.ps1                     # PowerShell startup script
@@ -91,7 +116,12 @@ CoupleFinancialAnalysis/
 bash start.sh
 ```
 
-**Manual Setup:**
+This will start:
+- **Backend**: http://localhost:5000
+- **Blazor Frontend**: http://localhost:3000
+- **Swagger API Docs**: http://localhost:5000/swagger
+
+### Manual Setup
 
 1. **Backend:**
 ```bash
@@ -101,8 +131,13 @@ dotnet run
 ```
 Runs on `http://localhost:5000`
 
-2. **Frontend:**
-Open browser to `http://localhost:5000`
+2. **Blazor Frontend:**
+```bash
+cd Frontend
+dotnet restore
+dotnet run --urls http://localhost:3000
+```
+Opens in browser at `http://localhost:3000`
 
 ## 📱 Usage Guide
 
@@ -223,17 +258,19 @@ Stores chat messages:
 
 ### Translation Files
 
-**Frontend** (`Frontend/locales/{lang}.json`):
+**Frontend** (`Frontend/wwwroot/locales/{lang}.json`):
 - Dashboard labels (title, column headers, tables)
 - Chat UI (title, placeholders, buttons)
 - Bot messages (welcome, prompts, confirmations)
 - System messages (errors, validation)
 - Button labels
+- Household work tracking (domestique) labels and references
 
 **Backend** (`Backend/questions/{lang}.json`):
-- 3 personal questions for woman
-- 3 personal questions for man
-- 3 shared expense questions
+- Personal questions for woman
+- Personal questions for man
+- Household work activity questions
+- Shared expense questions
 
 ### Language Detection & Persistence
 1. **On App Load**: Detects `navigator.language`

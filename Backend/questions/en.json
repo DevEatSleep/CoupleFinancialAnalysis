@@ -53,6 +53,54 @@
       "text": "Who paid for this expense (woman, man, or shared)?",
       "category": "expenses",
       "person": "shared"
+    },
+    {
+      "id": 10,
+      "text": "Cooking & housework \u2013 how many hours per week do you spend on this? (INSEE reference: woman ~15.75h, man ~9.5h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 11,
+      "text": "Childcare \u2013 how many hours per week? (INSEE reference: woman ~8.17h, man ~4.67h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 12,
+      "text": "Grocery shopping \u2013 how many hours per week? (INSEE reference: woman ~3.47h, man ~3h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 13,
+      "text": "DIY & gardening \u2013 how many hours per week? (INSEE reference: woman ~1.43h, man ~3.79h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 14,
+      "text": "Cooking & housework \u2013 how many hours per week do you spend on this? (INSEE reference: woman ~15.75h, man ~9.5h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 15,
+      "text": "Childcare \u2013 how many hours per week? (INSEE reference: woman ~8.17h, man ~4.67h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 16,
+      "text": "Grocery shopping \u2013 how many hours per week? (INSEE reference: woman ~3.47h, man ~3h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 17,
+      "text": "DIY & gardening \u2013 how many hours per week? (INSEE reference: woman ~1.43h, man ~3.79h)",
+      "category": "travail_domestique",
+      "person": "man"
     }
   ]
 }

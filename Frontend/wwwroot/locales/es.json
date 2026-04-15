@@ -1,0 +1,67 @@
+{
+  "dashboard": {
+    "title": "💑 Panel de Control",
+    "personal": "Información Personal",
+    "expenses": "Gastos",
+    "noResponses": "Sin respuestas aún",
+    "noExpenses": "Sin gastos aún",
+    "person": "Persona",
+    "firstName": "Nombre",
+    "age": "Edad",
+    "salary": "Salario",
+    "actions": "Acciones",
+    "expenseLabel": "Etiqueta de Gasto",
+    "amount": "Cantidad",
+    "paidBy": "Pagado Por",
+    "domestique": "🏠 Horas mensuales dedicadas a las tareas del hogar",
+    "domestiqueActivite": "Tarea",
+    "domestiqueWomanHours": "👩 mujer — horas/mes",
+    "domestiqueInseeWoman": "Ref. INSEE mujer (h/mes)",
+    "domestiqueManHours": "👨 hombre — horas/mes",
+    "domestiqueInseeMan": "Ref. INSEE hombre (h/mes)",
+    "domestiqueGap": "Diferencia declarada (M − H)",
+    "noDomestique": "Sin datos introducidos"
+  },
+  "person": {
+    "woman": "mujer",
+    "man": "hombre"
+  },
+  "chat": {
+    "title": "💬 Chat",
+    "placeholder": "Escribe tu mensaje...",
+    "sendButton": "Enviar",
+    "startConversation": "Comienza una conversación...",
+    "respondToBot": "Responde al bot...",
+    "enterExpenseLabel": "Ingresa la etiqueta del gasto...",
+    "sending": "⏳ Enviando...",
+    "online": "● En línea",
+    "offline": "● Desconectado"
+  },
+  "buttons": {
+    "womanQuestions": "👩 Preguntas para la mujer",
+    "manQuestions": "👨 Preguntas para el hombre",
+    "addExpenses": "💰 Agregar Gastos",
+    "domestiqueWoman": "👩 Declarar mis horas – mujer",
+    "domestiqueMan": "👨 Declarar mis horas – hombre"
+  },
+  "bot": {
+    "welcome": "💰 ¡Bienvenido al Seguimiento de Gastos! Agreguemos tus gastos mensuales.\n\nFormato: Te pediremos:\n1. Etiqueta del gasto (ej. 'Vivienda', 'Comida', 'Transporte')\n2. Cantidad mensual (en dólares)\n3. Quién pagó (mujer, hombre o compartido)\n\nPuedes agregar tantos gastos como quieras. Escribe 'done' cuando termines.\n\n¡Comencemos!",
+    "expenseRecorded": "¡Excelente! He registrado el gasto: {label} - ${amount} (pagado por {paidBy}). ¿Quieres agregar otro gasto? Escribe \"yes\" para continuar o \"done\" para terminar.",
+    "expenseFinished": "✅ ¡Excelente! He terminado de registrar tus gastos. Puedes verlos en la tabla de Gastos del panel de control. ¡Siéntete libre de agregar más más tarde!",
+    "allQuestionsAnswered": "Todas las preguntas para {person} han sido respondidas. Haz clic en 'Preguntas para {otherPerson}' para continuar.",
+    "allDone": "Todas las preguntas para {person} han sido respondidas. ¡Gracias!",
+    "error": "Lo siento, no pude iniciar el seguimiento de gastos. Por favor, intenta de nuevo.",
+    "startExpense": "¡Comencemos!",
+    "noQuestionsAvailable": "No hay más preguntas disponibles."
+  },
+  "messages": {
+    "deleteConfirm": "¿Estás seguro de que deseas eliminar esto?",
+    "updateFailed": "Error al actualizar. Por favor, intenta de nuevo.",
+    "deleteFailed": "Error al eliminar. Por favor, intenta de nuevo.",
+    "invalidRequest": "Solicitud inválida"
+  },
+  "commands": {
+    "yes": "sí",
+    "done": "listo"
+  }
+}

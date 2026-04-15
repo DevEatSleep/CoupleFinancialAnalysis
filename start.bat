@@ -21,7 +21,7 @@ timeout /t 3 /nobreak
 echo.
 echo Starting Blazor Frontend on http://localhost:3000...
 echo.
-start "Couple Chat - Blazor Frontend" cmd /k "cd /d %BASEDIR%\BlazorFrontend && dotnet run --urls http://localhost:3000"
+start "Couple Chat - Blazor Frontend" cmd /k "cd /d %BASEDIR%\Frontend && dotnet run --urls http://localhost:3000"
 
 echo.
 echo ========================================

@@ -52,7 +52,53 @@
       "id": 9,
       "text": "¿Quién pagó este gasto (mujer, hombre o compartido)?",
       "category": "expenses",
-      "person": "shared"
-    }
+      "person": "shared"    },
+    {
+      "id": 10,
+      "text": "Cocina & limpieza \u2013 \u00bfcu\u00e1ntas horas a la semana dedicas a esta tarea? (Referencia INSEE: mujer ~15.75h, hombre ~9.5h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 11,
+      "text": "Cuidado de ni\u00f1os \u2013 \u00bfcu\u00e1ntas horas a la semana? (Referencia INSEE: mujer ~8.17h, hombre ~4.67h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 12,
+      "text": "Compras \u2013 \u00bfcu\u00e1ntas horas a la semana? (Referencia INSEE: mujer ~3.47h, hombre ~3h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 13,
+      "text": "Bricolaje & jardiner\u00eda \u2013 \u00bfcu\u00e1ntas horas a la semana? (Referencia INSEE: mujer ~1.43h, hombre ~3.79h)",
+      "category": "travail_domestique",
+      "person": "woman"
+    },
+    {
+      "id": 14,
+      "text": "Cocina & limpieza \u2013 \u00bfcu\u00e1ntas horas a la semana dedicas a esta tarea? (Referencia INSEE: mujer ~15.75h, hombre ~9.5h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 15,
+      "text": "Cuidado de ni\u00f1os \u2013 \u00bfcu\u00e1ntas horas a la semana? (Referencia INSEE: mujer ~8.17h, hombre ~4.67h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 16,
+      "text": "Compras \u2013 \u00bfcu\u00e1ntas horas a la semana? (Referencia INSEE: mujer ~3.47h, hombre ~3h)",
+      "category": "travail_domestique",
+      "person": "man"
+    },
+    {
+      "id": 17,
+      "text": "Bricolaje & jardiner\u00eda \u2013 \u00bfcu\u00e1ntas horas a la semana? (Referencia INSEE: mujer ~1.43h, hombre ~3.79h)",
+      "category": "travail_domestique",
+      "person": "man"    }
   ]
 }

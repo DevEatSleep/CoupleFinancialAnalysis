@@ -24,7 +24,7 @@ sleep 3
 echo ""
 echo "Starting Blazor Frontend on http://localhost:3000..."
 echo ""
-cd "$SCRIPT_DIR/BlazorFrontend"
+cd "$SCRIPT_DIR/Frontend"
 dotnet run --urls http://localhost:3000 &
 BLAZOR_PID=$!
 

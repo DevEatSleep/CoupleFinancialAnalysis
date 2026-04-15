@@ -70,6 +70,16 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
     db.Database.EnsureCreated();
+
+    // Ensure DomestiqueResponses table exists (safe for existing DBs)
+    db.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS DomestiqueResponses (
+        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+        Person TEXT NOT NULL,
+        Activite TEXT NOT NULL,
+        HeuresParSemaine REAL NOT NULL,
+        InseeRefFemme REAL NOT NULL,
+        InseeRefHomme REAL NOT NULL,
+        CreatedAt TEXT NOT NULL)");
     
     // Seed reference data if table is empty
     if (!db.TravailDomestique.Any())

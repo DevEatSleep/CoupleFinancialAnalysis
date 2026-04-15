@@ -1,0 +1,119 @@
+@using Frontend.Services
+@using Frontend.Models
+@inject ChatState State
+@inject ApiClient Api
+@inject LocalizationService Loc
+@implements IDisposable
+
+@{
+    var activites = new[] { "cuisine & ménage", "soins enfants", "courses", "bricolage/jardinage" };
+    const double weekToMonth = 52.0 / 12.0;
+
+    var inseeRefs = new Dictionary<string, (decimal Femme, decimal Homme)>
+    {
+        { "cuisine & ménage",    (15.75m, 9.50m) },
+        { "soins enfants",       (8.17m,  4.67m) },
+        { "courses",             (3.47m,  3.00m) },
+        { "bricolage/jardinage", (1.43m,  3.79m) }
+    };
+
+    // Build lookup: activite → { woman, man }
+    var byActivite = activites.ToDictionary(
+        a => a,
+        a => new
+        {
+            Woman = State.DomestiqueData.FirstOrDefault(r => r.Person == "woman" && r.Activite == a),
+            Man   = State.DomestiqueData.FirstOrDefault(r => r.Person == "man"   && r.Activite == a)
+        }
+    );
+
+    var hasData = byActivite.Values.Any(v => v.Woman is not null || v.Man is not null);
+}
+
+<div class="domestique-table-wrapper">
+<table class="domestique-table">
+    <thead>
+        <tr>
+            <th>@Loc.T("dashboard.domestiqueActivite")</th>
+            <th>@Loc.T("dashboard.domestiqueWomanHours")</th>
+            <th>@Loc.T("dashboard.domestiqueInseeWoman")</th>
+            <th>@Loc.T("dashboard.domestiqueManHours")</th>
+            <th>@Loc.T("dashboard.domestiqueInseeMan")</th>
+            <th>@Loc.T("dashboard.domestiqueGap")</th>
+            <th>@Loc.T("dashboard.actions")</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!hasData)
+        {
+            <tr><td colspan="7" class="empty-state">@Loc.T("dashboard.noDomestique")</td></tr>
+        }
+        else
+        {
+            @foreach (var activite in activites)
+            {
+                var row      = byActivite[activite];
+                var refs     = inseeRefs[activite];
+                var womanH   = row.Woman?.HeuresParSemaine;
+                var manH     = row.Man?.HeuresParSemaine;
+                var womanId  = row.Woman?.Id;
+                var manId    = row.Man?.Id;
+
+                <tr>
+                    <td><strong>@activite</strong></td>
+                    <td>@(womanH.HasValue ? ((decimal)(womanH.Value * (decimal)weekToMonth)).ToString("F1") + "h" : "-")</td>
+                    <td><small style="color:#888">@((refs.Femme * (decimal)weekToMonth).ToString("F1"))h</small></td>
+                    <td>@(manH.HasValue ? ((decimal)(manH.Value * (decimal)weekToMonth)).ToString("F1") + "h" : "-")</td>
+                    <td><small style="color:#888">@((refs.Homme * (decimal)weekToMonth).ToString("F1"))h</small></td>
+                    <td>
+                        @if (womanH.HasValue && manH.HasValue)
+                        {
+                            var diff     = (womanH.Value - manH.Value) * (decimal)weekToMonth;
+                            var inseeGap = (refs.Femme - refs.Homme) * (decimal)weekToMonth;
+                            var color    = diff > 0 ? "#e91e63" : "#2196f3";
+                            <span style="color:@color; font-weight:bold">
+                                @(diff > 0 ? "+" : "")@diff.ToString("F1")h
+                            </span>
+                            <br />
+                            <small style="color:#888">INSEE: @(inseeGap > 0 ? "+" : "")@inseeGap.ToString("F1")h</small>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td>
+                        @if (womanId.HasValue || manId.HasValue)
+                        {
+                            <button class="delete-btn"
+                                    @onclick="() => DeleteRowAsync(womanId, manId)">🗑️</button>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        State.OnChange += StateHasChanged;
+        Loc.OnLanguageChanged += () => InvokeAsync(StateHasChanged);
+        State.DomestiqueData = await Api.GetDomestiqueAsync();
+    }
+
+    private async Task DeleteRowAsync(int? womanId, int? manId)
+    {
+        if (womanId.HasValue) await Api.DeleteDomestiqueAsync(womanId.Value);
+        if (manId.HasValue)   await Api.DeleteDomestiqueAsync(manId.Value);
+        State.DomestiqueData = await Api.GetDomestiqueAsync();
+        State.NotifyStateChanged();
+    }
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
+    }
+}

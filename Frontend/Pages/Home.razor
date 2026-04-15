@@ -1,0 +1,142 @@
+﻿@page "/"
+@using Frontend.Services
+@using Frontend.Models
+@inject ChatState State
+@inject BotService Bot
+@inject ApiClient Api
+@inject LocalizationService Loc
+@inject PollingService Polling
+@implements IDisposable
+
+<div class="container">
+    <!-- Left: Dashboard -->
+    <div class="dashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>@Loc.T("dashboard.title")</h1>
+            <LanguageSelector />
+        </div>
+        <div class="feed">
+            <h2>@Loc.T("dashboard.personal")</h2>
+            <ResponseTable />
+
+            <h2 style="margin-top: 30px;">@Loc.T("dashboard.expenses")</h2>
+            <ExpenseTable />
+
+            <h2 style="margin-top: 30px;">@Loc.T("dashboard.domestique")</h2>
+            <DomestiqueTable />
+        </div>
+    </div>
+
+    <!-- Right: Chat Window -->
+    <div class="chat-window">
+        <div class="chat-header">
+            <div class="chat-header-top">
+                <h2>@Loc.T("chat.title")</h2>
+                <span class="status @(State.IsConnected ? "online" : "offline")">
+                    @(State.IsConnected ? Loc.T("chat.online") : Loc.T("chat.offline"))
+                </span>
+            </div>
+            <div id="controls">
+                <button class="control-btn" style="background: #ff69b4; color: white;"
+                        @onclick="AskWomanQuestions">
+                    @WomanButtonLabel
+                </button>
+                <button class="control-btn" style="background: #4169e1; color: white;"
+                        @onclick="AskManQuestions">
+                    @ManButtonLabel
+                </button>
+                <button class="control-btn" style="background: #ff9800; color: white;"
+                        @onclick="Bot.StartExpenseModeAsync">
+                    @Loc.T("buttons.addExpenses")
+                </button>
+                <button class="control-btn" style="background: #4caf50; color: white;"
+                        @onclick="Bot.AskWomanDomestiqueAsync">
+                    @Loc.T("buttons.domestiqueWoman")
+                </button>
+                <button class="control-btn" style="background: #009688; color: white;"
+                        @onclick="Bot.AskManDomestiqueAsync">
+                    @Loc.T("buttons.domestiqueMan")
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" @ref="_chatContainer">
+            @if (State.Messages.Count == 0)
+            {
+                <p class="empty-state">@Loc.T("chat.startConversation")</p>
+            }
+            else
+            {
+                @foreach (var msg in State.Messages)
+                {
+                    <div class="chat-message @(msg.IsMine ? "mine" : "")">
+                        <div class="sender">@State.GetDisplayName(msg.Sender)</div>
+                        <div>@msg.Content</div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" @bind="InputText" @bind:event="oninput"
+                   @onkeydown="HandleKeyDown"
+                   placeholder="@Loc.T("chat.placeholder")"
+                   autocomplete="off" />
+            <button id="send-btn" @onclick="SendMessage">@Loc.T("chat.sendButton")</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string InputText { get; set; } = "";
+    private ElementReference _chatContainer;
+
+    private string WomanButtonLabel => Loc.T("buttons.womanQuestions")
+        .Replace("Woman", State.GetFirstName("woman"))
+        .Replace("Femme", State.GetFirstName("woman"))
+        .Replace("Mujer", State.GetFirstName("woman"));
+
+    private string ManButtonLabel => Loc.T("buttons.manQuestions")
+        .Replace("Man", State.GetFirstName("man"))
+        .Replace("Homme", State.GetFirstName("man"))
+        .Replace("Hombre", State.GetFirstName("man"));
+
+    private async Task AskWomanQuestions() => await Bot.AskQuestionsAsync("woman");
+    private async Task AskManQuestions() => await Bot.AskQuestionsAsync("man");
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+        Loc.OnLanguageChanged += OnLanguageChanged;
+        Polling.Start();
+    }
+
+    private void OnLanguageChanged()
+    {
+        _ = Api.SetLanguageAsync(Loc.CurrentLanguage);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(InputText))
+            return;
+
+        var text = InputText;
+        InputText = "";
+        await Bot.HandleUserInputAsync(text);
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+}

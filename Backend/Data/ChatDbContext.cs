@@ -11,6 +11,7 @@ public class ChatDbContext : DbContext
     public DbSet<Response> Responses { get; set; } = null!;
     public DbSet<Expense> Expenses { get; set; } = null!;
     public DbSet<TravailDomestique> TravailDomestique { get; set; } = null!;
+    public DbSet<DomestiqueResponse> DomestiqueResponses { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,6 +55,17 @@ public class ChatDbContext : DbContext
             entity.Property(e => e.DureeHeures).IsRequired();
             entity.Property(e => e.CoutJour).IsRequired();
             entity.HasIndex(e => new { e.Sexe, e.Activite, e.TrancheAge }).IsUnique();
+        });
+
+        modelBuilder.Entity<DomestiqueResponse>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Person).IsRequired();
+            entity.Property(e => e.Activite).IsRequired();
+            entity.Property(e => e.HeuresParSemaine).IsRequired();
+            entity.Property(e => e.InseeRefFemme).IsRequired();
+            entity.Property(e => e.InseeRefHomme).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
         });
 
         // Seed données INSEE (valeur horaire estimée à 15€/heure)

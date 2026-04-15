@@ -11,7 +11,7 @@ Write-Host ""
 # Get the script location
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 $backendPath = Join-Path $scriptPath "Backend"
-$blazorPath = Join-Path $scriptPath "BlazorFrontend"
+$blazorPath = Join-Path $scriptPath "Frontend"
 
 # Start Backend in a background job
 Write-Host "Starting Backend on http://localhost:5000..." -ForegroundColor Green
@@ -27,7 +27,7 @@ Start-Sleep -Seconds 3
 
 # Start Blazor Frontend in a background job
 Write-Host "Starting Blazor Frontend on http://localhost:3000..." -ForegroundColor Green
-$blazorJob = Start-Job -Name "BlazorFrontend" -ScriptBlock {
+$blazorJob = Start-Job -Name "Frontend" -ScriptBlock {
     param($path)
     Set-Location $path
     & dotnet run --urls http://localhost:3000
@@ -50,9 +50,9 @@ while ($true) {
         Write-Host "Backend job ended. Output:" -ForegroundColor Red
         Get-Job -Name "Backend" | Receive-Job
     }
-    if ((Get-Job -Name "BlazorFrontend").State -eq "Failed" -or (Get-Job -Name "BlazorFrontend").State -eq "Completed") {
-        Write-Host "Blazor Frontend job ended. Output:" -ForegroundColor Red
-        Get-Job -Name "BlazorFrontend" | Receive-Job
+    if ((Get-Job -Name "Frontend").State -eq "Failed" -or (Get-Job -Name "Frontend").State -eq "Completed") {
+        Write-Host "Frontend job ended. Output:" -ForegroundColor Red
+        Get-Job -Name "Frontend" | Receive-Job
     }
     Start-Sleep -Seconds 1
 }
