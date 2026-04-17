@@ -46,32 +46,43 @@ public class PollingService : IAsyncDisposable
 
     private async Task LoadDashboardDataAsync()
     {
-        // Load responses and organize into PersonData
-        var responses = await _api.GetResponsesAsync();
-        var woman = new PersonData();
-        var man = new PersonData();
-
-        foreach (var resp in responses)
+        try
         {
-            var target = resp.Person == "woman" ? woman : resp.Person == "man" ? man : null;
-            if (target is null) continue;
+            // Load responses and organize into PersonData
+            var responses = await _api.GetResponsesAsync();
+            var woman = new PersonData();
+            var man = new PersonData();
 
-            if (resp.Category == "personal")
+            foreach (var resp in responses)
             {
-                if (resp.QuestionId is 1 or 4) { target.Name = resp.UserResponse; target.NameId = resp.Id; }
-                else if (resp.QuestionId is 2 or 5) { target.Age = resp.UserResponse; target.AgeId = resp.Id; }
+                var target = resp.Person == "woman" ? woman : resp.Person == "man" ? man : null;
+                if (target is null) continue;
+
+                if (resp.Category == "personal")
+                {
+                    if (resp.QuestionId is 1 or 4) { target.Name = resp.UserResponse; target.NameId = resp.Id; }
+                    else if (resp.QuestionId is 2 or 5) { target.Age = resp.UserResponse; target.AgeId = resp.Id; }
+                }
+                else if (resp.Category == "financial")
+                {
+                    if (resp.QuestionId is 3 or 6) { target.Salary = resp.UserResponse; target.SalaryId = resp.Id; }
+                }
             }
-            else if (resp.Category == "financial")
-            {
-                if (resp.QuestionId is 3 or 6) { target.Salary = resp.UserResponse; target.SalaryId = resp.Id; }
-            }
+
+            _state.WomanData = woman;
+            _state.ManData = man;
+
+            // Load expenses
+            _state.Expenses = await _api.GetExpensesAsync();
+
+            // Load domestique data
+            _state.DomestiqueData = await _api.GetDomestiqueAsync();
+            System.Diagnostics.Debug.WriteLine($"Polling: Loaded {_state.DomestiqueData.Count} domestique records");
         }
-
-        _state.WomanData = woman;
-        _state.ManData = man;
-
-        // Load expenses
-        _state.Expenses = await _api.GetExpensesAsync();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"LoadDashboardData error: {ex.Message}");
+        }
     }
 
     public async ValueTask DisposeAsync()

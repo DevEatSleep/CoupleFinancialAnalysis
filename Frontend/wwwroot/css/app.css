@@ -408,6 +408,74 @@ body {
     }
 }
 
+/* Equality Score Card */
+.equality-card {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 8px;
+}
+
+.equality-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.equality-score-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.equality-score-value {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.equality-bar-bg {
+    background: #e0e0e0;
+    border-radius: 4px;
+    height: 8px;
+    width: 100%;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.equality-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.equality-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.equality-detail-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.equality-detail-table td:first-child {
+    width: 55%;
+}
+
+.equality-interpretation {
+    padding: 10px 14px;
+    border-radius: 0 4px 4px 0;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .container {

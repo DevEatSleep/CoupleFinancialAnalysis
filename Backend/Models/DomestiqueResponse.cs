@@ -8,5 +8,6 @@ public class DomestiqueResponse
     public decimal HeuresParSemaine { get; set; } // declared hours per week by the user
     public decimal InseeRefFemme { get; set; }    // INSEE reference hours/week for women
     public decimal InseeRefHomme { get; set; }    // INSEE reference hours/week for men
+    public decimal ValeurMonetaire { get; set; } // monetary value (hours × SMIC hourly rate)
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

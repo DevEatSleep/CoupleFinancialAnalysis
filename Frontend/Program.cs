@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Frontend;
 using Frontend.Services;
+using Shared;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -10,7 +11,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // HttpClient for API calls → backend
 builder.Services.AddHttpClient("Api", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5000");
+    client.BaseAddress = new Uri(Constants.Network.ServerUrl);
 });
 
 // HttpClient for local static files (locale JSON)
@@ -38,5 +39,9 @@ var host = builder.Build();
 // Initialize localization (uses default HttpClient → wwwroot)
 var loc = host.Services.GetRequiredService<LocalizationService>();
 await loc.InitializeAsync();
+
+// Initialize BotService to load INSEE reference data from backend
+var botService = host.Services.GetRequiredService<BotService>();
+await botService.InitializeAsync();
 
 await host.RunAsync();

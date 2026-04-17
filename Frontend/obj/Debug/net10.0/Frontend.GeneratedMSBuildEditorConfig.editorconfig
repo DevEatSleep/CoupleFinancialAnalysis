@@ -36,6 +36,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xEb21lc3RpcXVlVGFibGUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/VerdierThierry/Documents/CoupleFinancialAnalysis/Frontend/Components/EqualityScore.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xFcXVhbGl0eVNjb3JlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/VerdierThierry/Documents/CoupleFinancialAnalysis/Frontend/Components/ExpenseTable.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xFeHBlbnNlVGFibGUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 

@@ -1,130 +1,139 @@
-using CoupleChat.Data;
-using CoupleChat.Models;
+using CoupleChat.Models.Dto;
+using CoupleChat.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoupleChat.Controllers;
 
 /// <summary>
-/// Reference data controller for INSEE household work statistics
+/// Reference data controller for INSEE household work statistics.
+/// Provides a single entry point for accessing all domestic work reference data.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class ReferenceController : ControllerBase
 {
-    private readonly ChatDbContext _context;
+    private readonly DomestiqueReferenceService _domestiqueService;
 
-    public ReferenceController(ChatDbContext context)
+    public ReferenceController(DomestiqueReferenceService domestiqueService)
     {
-        _context = context;
+        _domestiqueService = domestiqueService;
     }
 
     /// <summary>
-    /// Récupère toutes les données INSEE du travail domestique
+    /// Get all INSEE reference data for domestic work activities.
     /// </summary>
-    /// <returns>Liste complète des données de travail domestique</returns>
-    /// <response code="200">Retourne la liste des données INSEE</response>
+    /// <returns>Complete list of INSEE domestic work data</returns>
+    /// <response code="200">Returns the INSEE data</response>
     [HttpGet("travail-domestique")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<IEnumerable<TravailDomestique>> GetTravailDomestique()
+    public async Task<ActionResult<IEnumerable<DomestiqueReferenceDto>>> GetTravailDomestique()
     {
-        return Ok(_context.TravailDomestique.ToList());
+        var data = await _domestiqueService.GetAllAsync();
+        return Ok(data);
     }
 
     /// <summary>
-    /// Filtre les données par sexe (femme/homme)
+    /// Get reference data filtered by gender (sexe).
     /// </summary>
-    /// <param name="sexe">femme ou homme</param>
-    /// <returns>Données filtrées par sexe</returns>
-    /// <response code="200">Retourne les données correspondantes</response>
-    /// <response code="404">Aucune donnée trouvée pour ce sexe</response>
+    /// <param name="sexe">femme or homme</param>
+    /// <returns>Data filtered by gender</returns>
+    /// <response code="200">Returns the matching data</response>
+    /// <response code="400">Invalid gender</response>
+    /// <response code="404">No data found for this gender</response>
     [HttpGet("travail-domestique/sexe/{sexe}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<IEnumerable<TravailDomestique>> GetByGender(string sexe)
+    public async Task<ActionResult<IEnumerable<DomestiqueReferenceDto>>> GetByGender(string sexe)
     {
-        var result = _context.TravailDomestique
-            .Where(t => t.Sexe.ToLower() == sexe.ToLower())
-            .ToList();
-        
-        if (!result.Any())
-            return NotFound($"Aucune donnée trouvée pour le sexe: {sexe}");
-        
-        return Ok(result);
+        try
+        {
+            var result = await _domestiqueService.GetBySexeAsync(sexe);
+            if (!result.Any())
+                return NotFound($"No data found for gender: {sexe}");
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
-    /// Filtre les données par type d'activité
+    /// Get reference data filtered by activity type.
     /// </summary>
-    /// <param name="activite">cuisine & ménage, soins enfants, courses, bricolage/jardinage</param>
-    /// <returns>Données filtrées par activité</returns>
-    /// <response code="200">Retourne les données correspondantes</response>
-    /// <response code="404">Aucune donnée trouvée pour cette activité</response>
+    /// <param name="activite">cuisine & ménage, soins enfants, courses, or bricolage/jardinage</param>
+    /// <returns>Data filtered by activity</returns>
+    /// <response code="200">Returns the matching data</response>
+    /// <response code="400">Invalid activity</response>
+    /// <response code="404">No data found for this activity</response>
     [HttpGet("travail-domestique/activite/{activite}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<IEnumerable<TravailDomestique>> GetByActivite(string activite)
+    public async Task<ActionResult<IEnumerable<DomestiqueReferenceDto>>> GetByActivite(string activite)
     {
-        var result = _context.TravailDomestique
-            .Where(t => t.Activite.Contains(activite, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        
-        if (!result.Any())
-            return NotFound($"Aucune donnée trouvée pour l'activité: {activite}");
-        
-        return Ok(result);
+        try
+        {
+            var result = await _domestiqueService.GetByActiviteAsync(activite);
+            if (!result.Any())
+                return NotFound($"No data found for activity: {activite}");
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
-    /// Filtre les données par sexe et tranche d'âge
+    /// Get reference data filtered by gender and age range.
     /// </summary>
-    /// <param name="sexe">femme ou homme</param>
-    /// <param name="tranche">18-24 ans, 25-34 ans, 35-49 ans, 50-64 ans</param>
-    /// <returns>Données filtrées par sexe et tranche d'âge</returns>
-    /// <response code="200">Retourne les données correspondantes</response>
-    /// <response code="404">Aucune donnée trouvée pour ces critères</response>
+    /// <param name="sexe">femme or homme</param>
+    /// <param name="tranche">18-24 ans, 25-34 ans, 35-49 ans, or 50-64 ans</param>
+    /// <returns>Data filtered by gender and age range</returns>
+    /// <response code="200">Returns the matching data</response>
+    /// <response code="400">Invalid gender or age range</response>
+    /// <response code="404">No data found for these criteria</response>
     [HttpGet("travail-domestique/sexe/{sexe}/tranche/{tranche}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<IEnumerable<TravailDomestique>> GetByGenderAndAge(string sexe, string tranche)
+    public async Task<ActionResult<IEnumerable<DomestiqueReferenceDto>>> GetByGenderAndAge(string sexe, string tranche)
     {
-        var result = _context.TravailDomestique
-            .Where(t => t.Sexe.ToLower() == sexe.ToLower() && 
-                       t.TrancheAge.Contains(tranche, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        
-        if (!result.Any())
-            return NotFound($"Aucune donnée trouvée pour {sexe} dans la tranche {tranche}");
-        
-        return Ok(result);
+        try
+        {
+            var result = await _domestiqueService.GetBySexeAndAgeRangeAsync(sexe, tranche);
+            if (!result.Any())
+                return NotFound($"No data found for {sexe} in age range {tranche}");
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
-    /// Récupère les statistiques globales par sexe et activité
+    /// Get aggregated statistics grouped by gender and activity.
     /// </summary>
-    /// <returns>Statistiques groupées et filtrées</returns>
-    /// <response code="200">Retourne les statistiques</response>
+    /// <returns>Statistics grouped by gender and activity</returns>
+    /// <response code="200">Returns the statistics</response>
     [HttpGet("travail-domestique/statistiques")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<object> GetStatistiques()
+    public async Task<ActionResult<IEnumerable<DomestiqueStatisticsDto>>> GetStatistiques()
     {
-        var stats = _context.TravailDomestique
-            .GroupBy(t => new { t.Sexe, t.Activite })
-            .Select(g => new
+        // Aggregate all reference data by gender and activity
+        var allData = await _domestiqueService.GetAllAsync();
+        
+        var stats = allData
+            .GroupBy(d => new { d.Sexe, d.Activite })
+            .Select(g => new DomestiqueStatisticsDto
             {
                 Sexe = g.Key.Sexe,
                 Activite = g.Key.Activite,
-                TotteMinutesParJour = g.Sum(x => x.DureeMinutes),
-                MoyenneMinutes = g.Average(x => x.DureeMinutes),
-                MoyenneCoutJour = g.Average(x => x.CoutJour),
-                DetailParTranche = g.GroupBy(x => x.TrancheAge)
-                    .Select(ag => new
-                    {
-                        TrancheAge = ag.Key,
-                        Minutes = ag.First().DureeMinutes,
-                        CoutJour = ag.First().CoutJour
-                    })
-                    .OrderBy(x => x.TrancheAge)
-                    .ToList()
+                AverageMinutesPerDay = (decimal)g.Average(x => x.DureeMinutes),
+                AverageHoursPerWeek = (decimal)g.Average(x => x.DureeHeures)
             })
             .OrderBy(x => x.Sexe)
             .ThenBy(x => x.Activite)

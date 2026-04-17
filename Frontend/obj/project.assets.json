@@ -565,6 +565,16 @@
           "build/Microsoft.NET.Sdk.WebAssembly.Pack.props": {},
           "build/Microsoft.NET.Sdk.WebAssembly.Pack.targets": {}
         }
+      },
+      "Shared/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/Shared.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Shared.dll": {}
+        }
       }
     },
     "net10.0/browser-wasm": {
@@ -1130,6 +1140,16 @@
         "build": {
           "build/Microsoft.NET.Sdk.WebAssembly.Pack.props": {},
           "build/Microsoft.NET.Sdk.WebAssembly.Pack.targets": {}
+        }
+      },
+      "Shared/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/Shared.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Shared.dll": {}
         }
       }
     }
@@ -2200,6 +2220,11 @@
         "tools/net472/Microsoft.NET.Sdk.WebAssembly.Pack.Tasks.dll",
         "tools/net472/Microsoft.NET.WebAssembly.Webcil.dll"
       ]
+    },
+    "Shared/1.0.0": {
+      "type": "project",
+      "path": "../Shared/Shared.csproj",
+      "msbuildProject": "../Shared/Shared.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -2210,7 +2235,8 @@
       "Microsoft.DotNet.HotReload.WebAssembly.Browser >= 10.0.201",
       "Microsoft.Extensions.Http >= 10.0.5",
       "Microsoft.NET.ILLink.Tasks >= 10.0.5",
-      "Microsoft.NET.Sdk.WebAssembly.Pack >= 10.0.5"
+      "Microsoft.NET.Sdk.WebAssembly.Pack >= 10.0.5",
+      "Shared >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -2237,7 +2263,11 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Shared\\Shared.csproj": {
+              "projectPath": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Shared\\Shared.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

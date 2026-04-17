@@ -63,5 +63,27 @@
   "commands": {
     "yes": "yes",
     "done": "done"
+  },
+  "equality": {
+    "title": "⚖️ Couple Equality Index",
+    "score": "Global score",
+    "financialGap": "Financial gap",
+    "domesticGap": "Domestic work gap",
+    "netWoman": "Woman's net income",
+    "netMan": "Man's net income",
+    "favorsWoman": "favors woman",
+    "favorsMan": "favors man",
+    "balanced": "balanced",
+    "combinedContribution": "💰 Combined contribution (income + domestic work − expenses)",
+    "womanContribution": "Woman's contribution",
+    "manContribution": "Man's contribution",
+    "topContributor": "Top contributor",
+    "woman": "woman",
+    "man": "man",
+    "noData": "Insufficient data — please fill in salaries, expenses, and household hours.",
+    "score90": "✅ Very good equality in the couple!",
+    "score70": "🟡 Slight imbalance, some adjustments possible.",
+    "score50": "🟠 Notable inequality. A conversation is needed.",
+    "score0": "🔴 Strong inequality detected. Review the distribution."
   }
 }

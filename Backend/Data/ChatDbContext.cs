@@ -65,6 +65,7 @@ public class ChatDbContext : DbContext
             entity.Property(e => e.HeuresParSemaine).IsRequired();
             entity.Property(e => e.InseeRefFemme).IsRequired();
             entity.Property(e => e.InseeRefHomme).IsRequired();
+            entity.Property(e => e.ValeurMonetaire).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
         });
 

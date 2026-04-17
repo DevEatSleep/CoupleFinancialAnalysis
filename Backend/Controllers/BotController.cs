@@ -2,6 +2,8 @@ using CoupleChat.Data;
 using CoupleChat.Models;
 using CoupleChat.Services;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
+using SharedConstants = Shared.Constants;
 
 namespace CoupleChat.Controllers;
 
@@ -212,7 +214,7 @@ public class BotController : ControllerBase
     {
         try
         {
-            if (!new[] { "en", "fr", "es" }.Contains(language))
+            if (!SharedConstants.Languages.Supported.Contains(language))
                 return BadRequest("Invalid language. Supported: en, fr, es");
 
             _botService.SetLanguage(language);

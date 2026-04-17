@@ -63,5 +63,25 @@
   "commands": {
     "yes": "oui",
     "done": "terminé"
+  },
+  "equality": {
+    "title": "⚖️ Indice d'égalité du couple",
+    "score": "Score global",
+    "financialGap": "Écart financier",
+    "domesticGap": "Écart tâches domestiques",
+    "netWoman": "Revenu net femme",
+    "netMan": "Revenu net homme",
+    "favorsWoman": "favorable à la femme",
+    "favorsMan": "favorable à l'homme",
+    "balanced": "équilibré",    "combinedContribution": "💰 Contribution combinée (revenu + travail domestique − dépenses)",
+    "womanContribution": "Contribution femme",
+    "manContribution": "Contribution homme",
+    "topContributor": "Principal contributeur",
+    "woman": "femme",
+    "man": "homme",    "noData": "Données insuffisantes — renseignez salaires, dépenses et heures domestiques.",
+    "score90": "✅ Très bonne égalité dans le couple !",
+    "score70": "🟡 Légère inégalité, quelques ajustements possibles.",
+    "score50": "🟠 Inégalité notable. Un dialogue s'impose.",
+    "score0": "🔴 Forte inégalité détectée. Revoyez la répartition."
   }
 }

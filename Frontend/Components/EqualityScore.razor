@@ -1,0 +1,179 @@
+@using Frontend.Services
+@using Frontend.Models
+@inject ChatState State
+@inject LocalizationService Loc
+@implements IDisposable
+
+@if (!HasAnyData)
+{
+    <p class="empty-state">@Loc.T("equality.noData")</p>
+}
+else
+{
+    <div class="equality-card">
+        <div class="equality-score-row">
+            <span class="equality-score-label">@Loc.T("equality.score")</span>
+            <span class="equality-score-value" style="color: @ScoreColor">@Score.ToString("F1") / 100</span>
+        </div>
+        <div class="equality-bar-bg">
+            <div class="equality-bar-fill" style="width: @Score.ToString("F0")%; background: @ScoreColor"></div>
+        </div>
+        <table class="equality-detail-table">
+            <tbody>
+                @if (HasFinancial)
+                {
+                    <tr>
+                        <td>@Loc.T("equality.financialGap")</td>
+                        <td><strong>@DeltaFinancial.ToString("F1") pts</strong></td>
+                        <td><small style="color:#888">@FinancialFavors</small></td>
+                    </tr>
+                    <tr>
+                        <td>@Loc.T("equality.netWoman")</td>
+                        <td colspan="2"><strong>@WomanNet.ToString("F0") €</strong></td>
+                    </tr>
+                    <tr>
+                        <td>@Loc.T("equality.netMan")</td>
+                        <td colspan="2"><strong>@ManNet.ToString("F0") €</strong></td>
+                    </tr>
+                }
+                @if (HasDomestic)
+                {
+                    <tr>
+                        <td>@Loc.T("equality.domesticGap")</td>
+                        <td><strong>@DeltaDomestic.ToString("F1") pts</strong></td>
+                        <td><small style="color:#888">@DomesticFavors</small></td>
+                    </tr>
+                }
+                @if (HasFinancial || HasDomestic)
+                {
+                    <tr style="border-top: 2px solid #ddd; padding-top: 8px;">
+                        <td colspan="3"><strong>@Loc.T("equality.combinedContribution")</strong></td>
+                    </tr>
+                    <tr>
+                        <td>👩 @Loc.T("equality.womanContribution")</td>
+                        <td colspan="2"><strong>@WomanContribution.ToString("F0") €</strong></td>
+                    </tr>
+                    <tr>
+                        <td>👨 @Loc.T("equality.manContribution")</td>
+                        <td colspan="2"><strong>@ManContribution.ToString("F0") €</strong></td>
+                    </tr>
+                    <tr>
+                        <td>@Loc.T("equality.topContributor")</td>
+                        <td colspan="2"><strong>@TopContributor</strong></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="equality-interpretation" style="border-left: 4px solid @ScoreColor">
+            @Interpretation
+        </div>
+    </div>
+}
+
+@code {
+    private const decimal HourlyRate = 11.88m;
+    private const double WeekToMonth = 52.0 / 12.0;
+
+    private decimal WomanSalary => decimal.TryParse(State.WomanData.Salary, out var v) ? v : 0;
+    private decimal ManSalary   => decimal.TryParse(State.ManData.Salary,   out var v) ? v : 0;
+    private decimal TotalSalary => WomanSalary + ManSalary;
+
+    private decimal WomanExpPaid  => State.Expenses.Where(e => e.PaidBy == "woman").Sum(e => e.Amount);
+    private decimal ManExpPaid    => State.Expenses.Where(e => e.PaidBy == "man").Sum(e => e.Amount);
+    private decimal SharedExpPaid => State.Expenses.Where(e => e.PaidBy == "shared").Sum(e => e.Amount);
+    private decimal WomanExp      => WomanExpPaid + SharedExpPaid / 2;
+    private decimal ManExp        => ManExpPaid   + SharedExpPaid / 2;
+    private decimal TotalExp      => WomanExp + ManExp;
+
+    private decimal WomanHoursM => State.DomestiqueData
+        .Where(d => d.Person == "woman").Sum(d => d.HeuresParSemaine * (decimal)WeekToMonth);
+    private decimal ManHoursM => State.DomestiqueData
+        .Where(d => d.Person == "man").Sum(d => d.HeuresParSemaine * (decimal)WeekToMonth);
+    private decimal TotalHours => WomanHoursM + ManHoursM;
+
+    private bool HasFinancial => TotalSalary > 0 && TotalExp > 0;
+    private bool HasDomestic  => TotalHours > 0;
+    private bool HasAnyData   => HasFinancial || HasDomestic;
+
+    private decimal DeltaFinancial => HasFinancial
+        ? Math.Abs(WomanExp / TotalExp - WomanSalary / TotalSalary) * 100
+        : 0;
+
+    private decimal DeltaDomestic => HasDomestic
+        ? Math.Abs(WomanHoursM / TotalHours - 0.5m) * 100
+        : 0;
+
+    private int ComponentCount => (HasFinancial ? 1 : 0) + (HasDomestic ? 1 : 0);
+
+    private decimal Score => ComponentCount > 0
+        ? Math.Max(0, 100 - (DeltaFinancial + DeltaDomestic) / ComponentCount)
+        : -1;
+
+    private string ScoreColor => Score >= 90 ? "#4caf50"
+        : Score >= 70 ? "#ff9800"
+        : Score >= 50 ? "#ff5722"
+        : "#f44336";
+
+    private string FinancialFavors
+    {
+        get
+        {
+            if (!HasFinancial) return "";
+            var diff = WomanExp / TotalExp - WomanSalary / TotalSalary;
+            if (diff >  0.001m) return Loc.T("equality.favorsMan");
+            if (diff < -0.001m) return Loc.T("equality.favorsWoman");
+            return Loc.T("equality.balanced");
+        }
+    }
+
+    private string DomesticFavors
+    {
+        get
+        {
+            if (!HasDomestic) return "";
+            var share = WomanHoursM / TotalHours;
+            if (share > 0.501m) return Loc.T("equality.favorsMan");
+            if (share < 0.499m) return Loc.T("equality.favorsWoman");
+            return Loc.T("equality.balanced");
+        }
+    }
+
+    private decimal WomanNet => WomanSalary - WomanExpPaid - SharedExpPaid / 2;
+    private decimal ManNet   => ManSalary   - ManExpPaid   - SharedExpPaid / 2;
+
+    private decimal WomanDomesticValue => State.DomestiqueData
+        .Where(d => d.Person == "woman").Sum(d => d.ValeurMonetaire);
+    private decimal ManDomesticValue => State.DomestiqueData
+        .Where(d => d.Person == "man").Sum(d => d.ValeurMonetaire);
+
+    private decimal WomanContribution => WomanSalary + WomanDomesticValue - WomanExpPaid - (SharedExpPaid / 2);
+    private decimal ManContribution   => ManSalary   + ManDomesticValue   - ManExpPaid   - (SharedExpPaid / 2);
+
+    private string TopContributor
+    {
+        get
+        {
+            if (!HasFinancial && !HasDomestic) return "-";
+            var diff = Math.Abs(WomanContribution - ManContribution);
+            if (diff < 100) return Loc.T("equality.balanced");
+            return WomanContribution > ManContribution ? Loc.T("equality.woman") : Loc.T("equality.man");
+        }
+    }
+
+    private decimal ContributionGap => Math.Abs(WomanContribution - ManContribution);
+
+    private string Interpretation => Score >= 90 ? Loc.T("equality.score90")
+        : Score >= 70 ? Loc.T("equality.score70")
+        : Score >= 50 ? Loc.T("equality.score50")
+        : Loc.T("equality.score0");
+
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
+    }
+}

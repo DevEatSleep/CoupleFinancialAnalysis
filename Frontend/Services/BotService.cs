@@ -1,7 +1,13 @@
 using Frontend.Models;
+using Shared;
+using SharedConstants = Shared.Constants;
 
 namespace Frontend.Services;
 
+/// <summary>
+/// Service for managing bot interactions including domestic work questions and reference data.
+/// Fetches all reference data from the backend API instead of using hardcoded values.
+/// </summary>
 public class BotService
 {
     private readonly ApiClient _api;
@@ -11,28 +17,21 @@ public class BotService
     // Question ID → (person, activite) mapping
     private static readonly Dictionary<int, (string Person, string Activite)> DomestiqueQuestionMap = new()
     {
-        { 10, ("woman", "cuisine & ménage") },
-        { 11, ("woman", "soins enfants") },
-        { 12, ("woman", "courses") },
-        { 13, ("woman", "bricolage/jardinage") },
-        { 14, ("man",   "cuisine & ménage") },
-        { 15, ("man",   "soins enfants") },
-        { 16, ("man",   "courses") },
-        { 17, ("man",   "bricolage/jardinage") }
+        { SharedConstants.QuestionIds.WomanCuisineEtMenage, (SharedConstants.PersonTypes.Woman, SharedConstants.Domestique.Activities.CuisineEtMenage) },
+        { SharedConstants.QuestionIds.WomanSoinsEnfants, (SharedConstants.PersonTypes.Woman, SharedConstants.Domestique.Activities.SoinsEnfants) },
+        { SharedConstants.QuestionIds.WomanCourses, (SharedConstants.PersonTypes.Woman, SharedConstants.Domestique.Activities.Courses) },
+        { SharedConstants.QuestionIds.WomanBricolagJardinage, (SharedConstants.PersonTypes.Woman, SharedConstants.Domestique.Activities.BricolagJardinage) },
+        { SharedConstants.QuestionIds.ManCuisineEtMenage, (SharedConstants.PersonTypes.Man, SharedConstants.Domestique.Activities.CuisineEtMenage) },
+        { SharedConstants.QuestionIds.ManSoinsEnfants, (SharedConstants.PersonTypes.Man, SharedConstants.Domestique.Activities.SoinsEnfants) },
+        { SharedConstants.QuestionIds.ManCourses, (SharedConstants.PersonTypes.Man, SharedConstants.Domestique.Activities.Courses) },
+        { SharedConstants.QuestionIds.ManBricolagJardinage, (SharedConstants.PersonTypes.Man, SharedConstants.Domestique.Activities.BricolagJardinage) }
     };
 
-    // INSEE reference averages (hours/week)
-    private static readonly Dictionary<string, (decimal InseeRefFemme, decimal InseeRefHomme)> InseeRefs = new()
-    {
-        { "cuisine & ménage",    (15.75m, 9.50m) },
-        { "soins enfants",       (8.17m,  4.67m) },
-        { "courses",             (3.47m,  3.00m) },
-        { "bricolage/jardinage", (1.43m,  3.79m) }
-    };
+    // Cached INSEE reference data (loaded from the API)
+    private Dictionary<string, (decimal InseeRefFemme, decimal InseeRefHomme)> _inseeRefsCache = new();
 
     // Ordered list of activities for domestique questions
-    private static readonly string[] DomestiqueActivites =
-        ["cuisine & ménage", "soins enfants", "courses", "bricolage/jardinage"];
+    private static readonly string[] DomestiqueActivites = SharedConstants.Domestique.Activities.All;
 
     // Index into DomestiqueActivites for the current domestique session
     private int _domestiqueIndex;
@@ -42,6 +41,49 @@ public class BotService
         _api = api;
         _state = state;
         _loc = loc;
+    }
+
+    /// <summary>
+    /// Initialize the service by loading reference data from the API.
+    /// Call this once on app startup.
+    /// </summary>
+    public async Task InitializeAsync()
+    {
+        await LoadInseeReferencesAsync();
+    }
+
+    /// <summary>
+    /// Fetch INSEE reference data from the backend API and cache locally.
+    /// </summary>
+    private async Task LoadInseeReferencesAsync()
+    {
+        try
+        {
+            var references = await _api.GetDomestiqueReferencesAsync();
+            if (references == null || references.Count == 0)
+                return;
+
+            _inseeRefsCache.Clear();
+
+            // Group by activity and calculate average hours/week for each gender
+            var grouped = references.GroupBy(r => r.Activite);
+            foreach (var actGroup in grouped)
+            {
+                var femmeAvg = (decimal)actGroup
+                    .Where(r => r.Sexe == SharedConstants.Domestique.Sexe.Femme)
+                    .Average(r => (double)r.DureeHeures);
+
+                var hommeAvg = (decimal)actGroup
+                    .Where(r => r.Sexe == SharedConstants.Domestique.Sexe.Homme)
+                    .Average(r => (double)r.DureeHeures);
+
+                _inseeRefsCache[actGroup.Key] = (femmeAvg, hommeAvg);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading INSEE references: {ex.Message}");
+        }
     }
 
     public async Task AskQuestionsAsync(string personType)
@@ -55,9 +97,10 @@ public class BotService
     public async Task AskWomanDomestiqueAsync()
     {
         _state.ClearChat();
-        _state.CurrentPersonType = "woman";
+        _state.CurrentPersonType = SharedConstants.PersonTypes.Woman;
         _state.DomestiqueMode = true;
         _domestiqueIndex = 0;
+        System.Diagnostics.Debug.WriteLine("Starting woman domestique questions");
         AskNextDomestiqueQuestion();
         await Task.CompletedTask;
     }
@@ -65,9 +108,10 @@ public class BotService
     public async Task AskManDomestiqueAsync()
     {
         _state.ClearChat();
-        _state.CurrentPersonType = "man";
+        _state.CurrentPersonType = SharedConstants.PersonTypes.Man;
         _state.DomestiqueMode = true;
         _domestiqueIndex = 0;
+        System.Diagnostics.Debug.WriteLine("Starting man domestique questions");
         AskNextDomestiqueQuestion();
         await Task.CompletedTask;
     }
@@ -77,7 +121,7 @@ public class BotService
         if (_domestiqueIndex >= DomestiqueActivites.Length)
         {
             // All domestique questions answered
-            var name = _state.GetFirstName(_state.CurrentPersonType ?? "woman");
+            var name = _state.GetFirstName(_state.CurrentPersonType ?? SharedConstants.PersonTypes.Woman);
             var msg = _loc.T("bot.allDone").Replace("{person}", name);
             _state.AddChatMessage("🤖 Bot", msg);
             _state.DomestiqueMode = false;
@@ -87,9 +131,11 @@ public class BotService
         }
 
         var activite = DomestiqueActivites[_domestiqueIndex];
-        var person   = _state.CurrentPersonType ?? "woman";
-        var baseId   = person == "woman" ? 10 : 14;
-        var (f, h)   = InseeRefs.TryGetValue(activite, out var r) ? r : (0m, 0m);
+        var person   = _state.CurrentPersonType ?? SharedConstants.PersonTypes.Woman;
+        var baseId   = person == SharedConstants.PersonTypes.Woman ? SharedConstants.QuestionIds.WomanDomestiqueBase : SharedConstants.QuestionIds.ManDomestiqueBase;
+        
+        // Get cached reference values
+        var (f, h) = _inseeRefsCache.TryGetValue(activite, out var r) ? r : (0m, 0m);
 
         var text = _loc.CurrentLanguage switch
         {
@@ -102,7 +148,7 @@ public class BotService
         {
             Id       = baseId + _domestiqueIndex,
             Text     = text,
-            Category = "travail_domestique",
+            Category = SharedConstants.QuestionCategories.TravailDomestique,
             Person   = person
         };
         _state.IsBotWaiting = true;
@@ -118,7 +164,7 @@ public class BotService
 
         _state.AddChatMessage("🤖 Bot", _loc.T("bot.welcome"));
 
-        await Task.Delay(300);
+        await Task.Delay(SharedConstants.Timings.ChatMessageDelayMs);
         var question = await _api.GetNextQuestionAsync("shared");
         if (question is not null)
         {
@@ -156,7 +202,7 @@ public class BotService
                     .Replace("{otherPerson}", manName);
                 _state.AddChatMessage("🤖 Bot", msg);
             }
-            else if (_state.CurrentPersonType == "man")
+            else if (_state.CurrentPersonType == SharedConstants.PersonTypes.Man)
             {
                 var msg = _loc.T("bot.allDone").Replace("{person}", manName);
                 _state.AddChatMessage("🤖 Bot", msg);
@@ -215,24 +261,24 @@ public class BotService
         var qId = question.Id;
 
         // Save first name for woman (Q1) or man (Q4)
-        if (qId is 1 or 4 && _state.CurrentPersonType is not null)
+        if ((qId == SharedConstants.QuestionIds.WomanFirstName || qId == SharedConstants.QuestionIds.ManFirstName) && _state.CurrentPersonType is not null)
         {
             _state.SaveFirstName(_state.CurrentPersonType, response);
         }
 
         // Handle expense questions
-        if (question.Category == "expenses")
+        if (question.Category == SharedConstants.QuestionCategories.Expenses)
         {
             switch (qId)
             {
-                case 7:
+                case SharedConstants.QuestionIds.ExpenseLabel:
                     _state.CurrentExpense.Label = response;
                     break;
-                case 8:
+                case SharedConstants.QuestionIds.ExpenseAmount:
                     if (decimal.TryParse(response, out var amount))
                         _state.CurrentExpense.Amount = amount;
                     break;
-                case 9:
+                case SharedConstants.QuestionIds.ExpensePaidBy:
                     _state.CurrentExpense.PaidBy = response;
 
                     // Save the complete expense
@@ -263,30 +309,52 @@ public class BotService
             _state.AddChatMessage(_state.CurrentUser, response);
             _state.IsBotWaiting = false;
             _state.CurrentBotQuestion = null;
-            await Task.Delay(300);
+            await Task.Delay(SharedConstants.Timings.ChatMessageDelayMs);
             await AskNextQuestionAsync();
             return;
         }
 
         // Handle travail domestique questions — save to /api/domestique
-        if (question.Category == "travail_domestique" && DomestiqueQuestionMap.TryGetValue(qId, out var mapping))
+        // No longer pass hardcoded INSEE ref values; the backend will fetch them
+        if (question.Category == SharedConstants.QuestionCategories.TravailDomestique && DomestiqueQuestionMap.TryGetValue(qId, out var mapping))
         {
             if (!decimal.TryParse(response, System.Globalization.NumberStyles.Any,
                 System.Globalization.CultureInfo.InvariantCulture, out var heures))
                 heures = 0m;
 
-            var (inseeF, inseeH) = InseeRefs.TryGetValue(mapping.Activite, out var r) ? r : (0m, 0m);
+            // Simply pass person, activity, and hours; the backend handles reference lookup
+            try
+            {
+                var saveSuccess = await _api.SaveDomestiqueAsync(mapping.Person, mapping.Activite, heures);
+                if (!saveSuccess)
+                {
+                    _state.AddChatMessage(_state.CurrentUser, response);
+                    _state.AddChatMessage("🤖 Bot", _loc.T("bot.error"));
+                    _state.IsBotWaiting = false;
+                    _state.CurrentBotQuestion = null;
+                    _state.NotifyStateChanged();
+                    return;
+                }
 
-            await _api.SaveDomestiqueAsync(mapping.Person, mapping.Activite, heures, inseeF, inseeH);
-
-            _state.AddChatMessage(_state.CurrentUser, response);
-            _state.DomestiqueData = await _api.GetDomestiqueAsync();
-            _state.IsBotWaiting = false;
-            _state.CurrentBotQuestion = null;
-            _state.NotifyStateChanged();
+                _state.AddChatMessage(_state.CurrentUser, response);
+                _state.DomestiqueData = await _api.GetDomestiqueAsync();
+                _state.IsBotWaiting = false;
+                _state.CurrentBotQuestion = null;
+                _state.NotifyStateChanged();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error saving domestique data: {ex.Message}");
+                _state.AddChatMessage(_state.CurrentUser, response);
+                _state.AddChatMessage("🤖 Bot", _loc.T("bot.error"));
+                _state.IsBotWaiting = false;
+                _state.CurrentBotQuestion = null;
+                _state.NotifyStateChanged();
+                return;
+            }
 
             _domestiqueIndex++;
-            await Task.Delay(300);
+            await Task.Delay(SharedConstants.Timings.ChatMessageDelayMs);
             AskNextDomestiqueQuestion();
             return;
         }
@@ -304,7 +372,7 @@ public class BotService
 
         if (_state.CurrentPersonType is not null)
         {
-            await Task.Delay(300);
+            await Task.Delay(SharedConstants.Timings.ChatMessageDelayMs);
             await AskNextQuestionAsync();
         }
     }

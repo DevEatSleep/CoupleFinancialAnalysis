@@ -1,22 +1,33 @@
+using CoupleChat;
 using CoupleChat.Data;
 using CoupleChat.Models;
+using CoupleChat.Models.Dto;
+using CoupleChat.Services;
+using CoupleChat.Utilities;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
+using SharedConstants = Shared.Constants;
 
 namespace CoupleChat.Controllers;
 
+/// <summary>
+/// Controller for managing user-declared domestic work activities and comparing them with INSEE references.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class DomestiqueController : ControllerBase
 {
     private readonly ChatDbContext _context;
+    private readonly DomestiqueReferenceService _referenceService;
 
-    public DomestiqueController(ChatDbContext context)
+    public DomestiqueController(ChatDbContext context, DomestiqueReferenceService referenceService)
     {
         _context = context;
+        _referenceService = referenceService;
     }
 
     /// <summary>
-    /// Récupère toutes les réponses de travail domestique
+    /// Get all user-declared domestic work responses.
     /// </summary>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -26,34 +37,67 @@ public class DomestiqueController : ControllerBase
     }
 
     /// <summary>
-    /// Enregistre la déclaration d'heures domestiques d'une personne pour une activité
+    /// Save a user's declaration of hours spent on a domestic work activity.
+    /// Automatically calculates monetary value based on SMIC and compares with INSEE references.
     /// </summary>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<DomestiqueResponse> Create([FromBody] DomestiqueResponse response)
+    public async Task<ActionResult<DomestiqueResponseDto>> Create([FromBody] DomestiqueResponse response)
     {
+        // Validate input
         if (string.IsNullOrWhiteSpace(response.Person) || string.IsNullOrWhiteSpace(response.Activite))
             return BadRequest("Person and Activite are required.");
 
+        if (!SharedConstants.PersonTypes.All.Contains(response.Person))
+            return BadRequest($"Invalid Person value. Must be one of: {string.Join(", ", SharedConstants.PersonTypes.All)}");
+
+        if (!SharedConstants.Domestique.Activities.All.Contains(response.Activite))
+            return BadRequest($"Invalid Activite. Must be one of: {string.Join(", ", SharedConstants.Domestique.Activities.All)}");
+
+        // Set timestamp and calculate monetary value
         response.CreatedAt = DateTime.UtcNow;
+        response.ValeurMonetaire = response.HeuresParSemaine * SharedConstants.Domestique.WeekToMonthFactor * SharedConstants.Domestique.HourlyRate;
+        
+        // Get INSEE reference values for comparison
+        var referenceFemme = await _referenceService.GetActivityReferenceForGenderAsync(response.Activite, SharedConstants.Domestique.Sexe.Femme);
+        var referenceHomme = await _referenceService.GetActivityReferenceForGenderAsync(response.Activite, SharedConstants.Domestique.Sexe.Homme);
+
+        response.InseeRefFemme = (decimal)(referenceFemme ?? 0);
+        response.InseeRefHomme = (decimal)(referenceHomme ?? 0);
+
         _context.DomestiqueResponses.Add(response);
-        _context.SaveChanges();
-        return CreatedAtAction(nameof(GetAll), new { id = response.Id }, response);
+        await _context.SaveChangesAsync();
+
+        // Return DTO with reference data
+        var responseDto = new DomestiqueResponseDto
+        {
+            Id = response.Id,
+            Person = response.Person,
+            Activite = response.Activite,
+            HeuresParSemaine = response.HeuresParSemaine,
+            ValeurMonetaire = response.ValeurMonetaire,
+            CreatedAt = response.CreatedAt,
+            InseeReferenceFemme = referenceFemme ?? 0,
+            InseeReferenceHomme = referenceHomme ?? 0
+        };
+
+        return CreatedAtAction(nameof(GetAll), new { id = response.Id }, responseDto);
     }
 
     /// <summary>
-    /// Supprime une réponse de travail domestique
+    /// Delete a domestic work response.
     /// </summary>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var item = _context.DomestiqueResponses.Find(id);
+        var item = await _context.DomestiqueResponses.FindAsync(id);
         if (item == null) return NotFound();
+        
         _context.DomestiqueResponses.Remove(item);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
         return NoContent();
     }
 }

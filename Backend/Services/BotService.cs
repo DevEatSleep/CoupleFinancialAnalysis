@@ -1,4 +1,7 @@
 using System.Text.Json;
+using CoupleChat;
+using Shared;
+using SharedConstants = Shared.Constants;
 
 namespace CoupleChat.Services;
 
@@ -18,7 +21,7 @@ public class BotService
     private int _manQuestionIndex = 0;
     private int _sharedQuestionIndex = 0;
     private string _questionsBasePath;
-    private string _currentLanguage = "en";
+    private string _currentLanguage = SharedConstants.Languages.English;
 
     public BotService(string questionsFilePath)
     {
@@ -36,7 +39,7 @@ public class BotService
 
     public void SetLanguage(string language)
     {
-        if (new[] { "en", "fr", "es" }.Contains(language))
+        if (SharedConstants.Languages.Supported.Contains(language))
         {
             _currentLanguage = language;
             ResetIndices();
@@ -80,15 +83,15 @@ public class BotService
             var json = File.ReadAllText(langFilePath);
             using (JsonDocument doc = JsonDocument.Parse(json))
             {
-                var questions = doc.RootElement.GetProperty("questions");
+                var questions = doc.RootElement.GetProperty(Constants.JsonProperties.Questions);
                 foreach (var q in questions.EnumerateArray())
                 {
                     _questions.Add(new Question
                     {
-                        Id = q.GetProperty("id").GetInt32(),
-                        Text = q.GetProperty("text").GetString() ?? "",
-                        Category = q.GetProperty("category").GetString() ?? "",
-                        Person = q.TryGetProperty("person", out var person) ? person.GetString() ?? "" : ""
+                        Id = q.GetProperty(Constants.JsonProperties.Id).GetInt32(),
+                        Text = q.GetProperty(Constants.JsonProperties.Text).GetString() ?? "",
+                        Category = q.GetProperty(Constants.JsonProperties.Category).GetString() ?? "",
+                        Person = q.TryGetProperty(Constants.JsonProperties.Person, out var person) ? person.GetString() ?? "" : ""
                     });
                 }
             }
@@ -117,11 +120,11 @@ public class BotService
             return null;
 
         int index;
-        if (person == "woman")
+        if (person == SharedConstants.PersonTypes.Woman)
             index = _womanQuestionIndex;
-        else if (person == "man")
+        else if (person == SharedConstants.PersonTypes.Man)
             index = _manQuestionIndex;
-        else if (person == "shared")
+        else if (person == SharedConstants.PersonTypes.Shared)
             index = _sharedQuestionIndex;
         else
             return null;
@@ -131,11 +134,11 @@ public class BotService
 
         var question = personQuestions[index];
         
-        if (person == "woman")
+        if (person == SharedConstants.PersonTypes.Woman)
             _womanQuestionIndex++;
-        else if (person == "man")
+        else if (person == SharedConstants.PersonTypes.Man)
             _manQuestionIndex++;
-        else if (person == "shared")
+        else if (person == SharedConstants.PersonTypes.Shared)
             _sharedQuestionIndex++;
 
         return question;

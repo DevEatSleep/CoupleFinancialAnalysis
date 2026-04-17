@@ -63,5 +63,27 @@
   "commands": {
     "yes": "sí",
     "done": "listo"
+  },
+  "equality": {
+    "title": "⚖️ Índice de Igualdad de Pareja",
+    "score": "Puntuación global",
+    "financialGap": "Diferencia financiera",
+    "domesticGap": "Diferencia tareas domésticas",
+    "netWoman": "Ingreso neto mujer",
+    "netMan": "Ingreso neto hombre",
+    "favorsWoman": "favorable a la mujer",
+    "favorsMan": "favorable al hombre",
+    "balanced": "equilibrado",
+    "combinedContribution": "💰 Contribución combinada (ingresos + trabajo doméstico − gastos)",
+    "womanContribution": "Contribución mujer",
+    "manContribution": "Contribución hombre",
+    "topContributor": "Principal contribuidor",
+    "woman": "mujer",
+    "man": "hombre",
+    "noData": "Datos insuficientes — complete salarios, gastos y horas domésticas.",
+    "score90": "✅ ¡Muy buena igualdad en la pareja!",
+    "score70": "🟡 Leve desequilibrio, algunos ajustes posibles.",
+    "score50": "🟠 Desigualdad notable. Se necesita una conversación.",
+    "score0": "🔴 Fuerte desigualdad detectada. Revisen el reparto."
   }
 }

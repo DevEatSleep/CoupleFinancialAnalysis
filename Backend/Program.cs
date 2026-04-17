@@ -1,7 +1,10 @@
+using CoupleChat;
 using CoupleChat.Data;
 using CoupleChat.Models;
 using CoupleChat.Services;
+using CoupleChat.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +15,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy(Constants.Network.CorsPolicyName, policy =>
     {
-        policy.WithOrigins("http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:3000", "http://127.0.0.1:3000")
+        policy.WithOrigins(Constants.Network.AllowedOrigins)
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -23,10 +26,13 @@ builder.Services.AddCors(options =>
 
 // Database
 builder.Services.AddDbContext<ChatDbContext>(options =>
-    options.UseSqlite("Data Source=chat.db"));
+    options.UseSqlite($"Data Source={Constants.Paths.DatabaseFile}"));
+
+// Domestic work services
+builder.Services.AddScoped<DomestiqueReferenceService>();
 
 // Bot Services
-var questionsPath = Path.Combine(Directory.GetCurrentDirectory(), "questions");
+var questionsPath = Path.Combine(Directory.GetCurrentDirectory(), Constants.Paths.QuestionsDirectory);
 builder.Services.AddSingleton(new BotService(questionsPath));
 builder.Services.AddSingleton(new NlpProcessor(Path.Combine(Directory.GetCurrentDirectory(), "questions.json")));
 
@@ -37,108 +43,82 @@ var app = builder.Build();
 
 // Middleware
 app.UseRouting();
-app.UseCors("AllowFrontend");
+app.UseCors(Constants.Network.CorsPolicyName);
 
 // Swagger/OpenAPI
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Couple Chat API v1");
-    options.RoutePrefix = "swagger";
-});
-
-// Serve static files from Frontend folder
-var frontendPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "Frontend");
-app.UseDefaultFiles(new DefaultFilesOptions
-{
-    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(frontendPath),
-    RequestPath = ""
-});
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(frontendPath),
-    RequestPath = ""
+    options.SwaggerEndpoint(Constants.Routes.SwaggerEndpoint, Constants.Routes.SwaggerTitle);
+    options.RoutePrefix = Constants.Routes.Swagger;
 });
 
 app.MapControllers();
 
 // Health check
-app.MapGet("/health", () => "OK");
+app.MapGet(Constants.Routes.Health, () => Constants.Routes.HealthResponse);
 
 // Database initialization
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
+    // EnsureCreated will create all tables based on DbContext configuration, including DomestiqueResponses
     db.Database.EnsureCreated();
 
-    // Ensure DomestiqueResponses table exists (safe for existing DBs)
-    db.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS DomestiqueResponses (
-        Id INTEGER PRIMARY KEY AUTOINCREMENT,
-        Person TEXT NOT NULL,
-        Activite TEXT NOT NULL,
-        HeuresParSemaine REAL NOT NULL,
-        InseeRefFemme REAL NOT NULL,
-        InseeRefHomme REAL NOT NULL,
-        CreatedAt TEXT NOT NULL)");
-    
     // Seed reference data if table is empty
     if (!db.TravailDomestique.Any())
     {
-        const decimal hourlyRate = 15m;
-        var donneesInsee = new (string, string, string, int)[]
+        // INSEE reference data: (activity, age range, femme minutes, homme minutes)
+        var donneesInsee = new (string, string, int, int)[]
         {
-            ("femme", "cuisine & ménage", "18-24 ans", 120),
-            ("homme", "cuisine & ménage", "18-24 ans", 70),
-            ("femme", "soins enfants", "18-24 ans", 50),
-            ("homme", "soins enfants", "18-24 ans", 30),
-            ("femme", "courses", "18-24 ans", 25),
-            ("homme", "courses", "18-24 ans", 20),
-            ("femme", "bricolage/jardinage", "18-24 ans", 10),
-            ("homme", "bricolage/jardinage", "18-24 ans", 20),
-            ("femme", "cuisine & ménage", "25-34 ans", 140),
-            ("homme", "cuisine & ménage", "25-34 ans", 85),
-            ("femme", "soins enfants", "25-34 ans", 95),
-            ("homme", "soins enfants", "25-34 ans", 55),
-            ("femme", "courses", "25-34 ans", 32),
-            ("homme", "courses", "25-34 ans", 28),
-            ("femme", "bricolage/jardinage", "25-34 ans", 12),
-            ("homme", "bricolage/jardinage", "25-34 ans", 35),
-            ("femme", "cuisine & ménage", "35-49 ans", 150),
-            ("homme", "cuisine & ménage", "35-49 ans", 90),
-            ("femme", "soins enfants", "35-49 ans", 105),
-            ("homme", "soins enfants", "35-49 ans", 60),
-            ("femme", "courses", "35-49 ans", 34),
-            ("homme", "courses", "35-49 ans", 30),
-            ("femme", "bricolage/jardinage", "35-49 ans", 15),
-            ("homme", "bricolage/jardinage", "35-49 ans", 40),
-            ("femme", "cuisine & ménage", "50-64 ans", 130),
-            ("homme", "cuisine & ménage", "50-64 ans", 80),
-            ("femme", "soins enfants", "50-64 ans", 30),
-            ("homme", "soins enfants", "50-64 ans", 15),
-            ("femme", "courses", "50-64 ans", 28),
-            ("homme", "courses", "50-64 ans", 25),
-            ("femme", "bricolage/jardinage", "50-64 ans", 12),
-            ("homme", "bricolage/jardinage", "50-64 ans", 35),
+            // 18-24 ans
+            (Constants.Domestique.Activities.CuisineEtMenage, Constants.Domestique.AgeRanges.Range18_24, 120, 70),
+            (Constants.Domestique.Activities.SoinsEnfants, Constants.Domestique.AgeRanges.Range18_24, 50, 30),
+            (Constants.Domestique.Activities.Courses, Constants.Domestique.AgeRanges.Range18_24, 25, 20),
+            (Constants.Domestique.Activities.BricolagJardinage, Constants.Domestique.AgeRanges.Range18_24, 10, 20),
+            // 25-34 ans
+            (Constants.Domestique.Activities.CuisineEtMenage, Constants.Domestique.AgeRanges.Range25_34, 140, 85),
+            (Constants.Domestique.Activities.SoinsEnfants, Constants.Domestique.AgeRanges.Range25_34, 95, 55),
+            (Constants.Domestique.Activities.Courses, Constants.Domestique.AgeRanges.Range25_34, 32, 28),
+            (Constants.Domestique.Activities.BricolagJardinage, Constants.Domestique.AgeRanges.Range25_34, 12, 35),
+            // 35-49 ans
+            (Constants.Domestique.Activities.CuisineEtMenage, Constants.Domestique.AgeRanges.Range35_49, 150, 90),
+            (Constants.Domestique.Activities.SoinsEnfants, Constants.Domestique.AgeRanges.Range35_49, 105, 60),
+            (Constants.Domestique.Activities.Courses, Constants.Domestique.AgeRanges.Range35_49, 34, 30),
+            (Constants.Domestique.Activities.BricolagJardinage, Constants.Domestique.AgeRanges.Range35_49, 15, 40),
+            // 50-64 ans
+            (Constants.Domestique.Activities.CuisineEtMenage, Constants.Domestique.AgeRanges.Range50_64, 130, 80),
+            (Constants.Domestique.Activities.SoinsEnfants, Constants.Domestique.AgeRanges.Range50_64, 30, 15),
+            (Constants.Domestique.Activities.Courses, Constants.Domestique.AgeRanges.Range50_64, 28, 25),
+            (Constants.Domestique.Activities.BricolagJardinage, Constants.Domestique.AgeRanges.Range50_64, 12, 35),
         };
 
-        foreach (var (sexe, activite, trancheAge, dureeMinutes) in donneesInsee)
+        // Generate TravailDomestique records from the data (2 sexes per activity/age combo)
+        foreach (var (activite, trancheAge, femmeMinutes, hommeMinutes) in donneesInsee)
         {
-            var dureeHeures = Math.Round(dureeMinutes / 60m, 2);
-            var coutJour = Math.Round((dureeHeures * hourlyRate), 2);
-
-            db.TravailDomestique.Add(new TravailDomestique
+            foreach (var (sexe, dureeMinutes) in new[] { 
+                (Constants.Domestique.Sexe.Femme, femmeMinutes), 
+                (Constants.Domestique.Sexe.Homme, hommeMinutes) 
+            })
             {
-                Sexe = sexe,
-                Activite = activite,
-                TrancheAge = trancheAge,
-                DureeMinutes = dureeMinutes,
-                DureeHeures = dureeHeures,
-                CoutJour = coutJour
-            });
+                var dureeHeures = Math.Round((decimal)dureeMinutes / 60m, 2);
+                var coutJour = Math.Round(dureeHeures * Constants.Domestique.HourlyRate, 2);
+
+                db.TravailDomestique.Add(new TravailDomestique
+                {
+                    Sexe = sexe,
+                    Activite = activite,
+                    TrancheAge = trancheAge,
+                    DureeMinutes = dureeMinutes,
+                    DureeHeures = dureeHeures,
+                    CoutJour = coutJour
+                });
+            }
         }
-        
+
         db.SaveChanges();
     }
 }
 
-app.Run("http://localhost:5000");
+app.Run(Constants.Network.ServerUrl);
+
