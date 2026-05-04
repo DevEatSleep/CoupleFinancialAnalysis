@@ -67,6 +67,8 @@ public class ChatDbContext : DbContext
             entity.Property(e => e.InseeRefHomme).IsRequired();
             entity.Property(e => e.ValeurMonetaire).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
+            // Prevent duplicate entries for the same person + activity
+            entity.HasIndex(e => new { e.Person, e.Activite }).IsUnique();
         });
 
         // Seed données INSEE (valeur horaire estimée à 15€/heure)

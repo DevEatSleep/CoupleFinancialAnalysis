@@ -9,13 +9,17 @@
     var activites = new[] { "cuisine & ménage", "soins enfants", "courses", "bricolage/jardinage" };
     const double weekToMonth = 52.0 / 12.0;
 
-    // Build lookup: activite → { woman, man }
+    // Build lookup: activite → { woman, man } — case-insensitive comparison to tolerate DB casing differences
     var byActivite = activites.ToDictionary(
         a => a,
         a => new
         {
-            Woman = State.DomestiqueData.FirstOrDefault(r => r.Person == "woman" && r.Activite == a),
-            Man   = State.DomestiqueData.FirstOrDefault(r => r.Person == "man"   && r.Activite == a)
+            Woman = State.DomestiqueData.FirstOrDefault(r =>
+                        string.Equals(r.Person, "woman", StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(r.Activite, a, StringComparison.OrdinalIgnoreCase)),
+            Man   = State.DomestiqueData.FirstOrDefault(r =>
+                        string.Equals(r.Person, "man", StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(r.Activite, a, StringComparison.OrdinalIgnoreCase))
         }
     );
 
@@ -89,11 +93,23 @@
 </table>
 </div>
 
+
+
 @code {
+    private Action? _stateHandler;
+    private Action? _locHandler;
+
     protected override void OnInitialized()
     {
-        State.OnChange += StateHasChanged;
-        Loc.OnLanguageChanged += () => InvokeAsync(StateHasChanged);
+        _stateHandler = () => InvokeAsync(StateHasChanged);
+        _locHandler   = () => InvokeAsync(StateHasChanged);
+        State.OnChange += _stateHandler;
+        Loc.OnLanguageChanged += _locHandler;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        State.DomestiqueData = await Api.GetDomestiqueAsync();
     }
 
     private async Task DeleteRowAsync(int? womanId, int? manId)
@@ -106,6 +122,7 @@
 
     public void Dispose()
     {
-        State.OnChange -= StateHasChanged;
+        State.OnChange -= _stateHandler;
+        Loc.OnLanguageChanged -= _locHandler;
     }
 }

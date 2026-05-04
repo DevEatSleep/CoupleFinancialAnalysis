@@ -86,8 +86,8 @@ public static class Constants
     /// </summary>
     public static class Domestique
     {
-        /// <summary>Hourly rate for domestic work valuation (SMIC).</summary>
-        public const decimal HourlyRate = 11.88m;
+        /// <summary>Hourly rate for domestic work valuation (€/heure).</summary>
+        public const decimal HourlyRate = 15m;
 
         /// <summary>Conversion factor from weeks to months: 52/12.</summary>
         public const decimal WeekToMonthFactor = 52m / 12m;

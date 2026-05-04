@@ -33,11 +33,17 @@ public class DomestiqueController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<DomestiqueResponse>> GetAll()
     {
-        return Ok(_context.DomestiqueResponses.ToList());
+        Console.WriteLine("[DomestiqueController] GET /api/domestique called");
+        var items = _context.DomestiqueResponses.ToList();
+        Console.WriteLine($"[DomestiqueController] Retrieved {items.Count} DomestiqueResponses");
+        foreach (var item in items)
+            item.ValeurMonetaire = Math.Round(item.ValeurMonetaire, 2);
+        return Ok(items);
     }
 
     /// <summary>
     /// Save a user's declaration of hours spent on a domestic work activity.
+    /// Upserts: updates existing entry for the same person+activity, or creates a new one.
     /// Automatically calculates monetary value based on SMIC and compares with INSEE references.
     /// </summary>
     [HttpPost]
@@ -45,8 +51,9 @@ public class DomestiqueController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<DomestiqueResponseDto>> Create([FromBody] DomestiqueResponse response)
     {
+        Console.WriteLine($"[DomestiqueController] POST /api/domestique called with Person={(response?.Person ?? "(null)" )}, Activite={(response?.Activite ?? "(null)" )}, HeuresParSemaine={(response != null ? response.HeuresParSemaine.ToString() : "(null)")}");
         // Validate input
-        if (string.IsNullOrWhiteSpace(response.Person) || string.IsNullOrWhiteSpace(response.Activite))
+        if (response == null || string.IsNullOrWhiteSpace(response.Person) || string.IsNullOrWhiteSpace(response.Activite))
             return BadRequest("Person and Activite are required.");
 
         if (!SharedConstants.PersonTypes.All.Contains(response.Person))
@@ -55,16 +62,48 @@ public class DomestiqueController : ControllerBase
         if (!SharedConstants.Domestique.Activities.All.Contains(response.Activite))
             return BadRequest($"Invalid Activite. Must be one of: {string.Join(", ", SharedConstants.Domestique.Activities.All)}");
 
-        // Set timestamp and calculate monetary value
-        response.CreatedAt = DateTime.UtcNow;
-        response.ValeurMonetaire = response.HeuresParSemaine * SharedConstants.Domestique.WeekToMonthFactor * SharedConstants.Domestique.HourlyRate;
-        
-        // Get INSEE reference values for comparison
-        var referenceFemme = await _referenceService.GetActivityReferenceForGenderAsync(response.Activite, SharedConstants.Domestique.Sexe.Femme);
-        var referenceHomme = await _referenceService.GetActivityReferenceForGenderAsync(response.Activite, SharedConstants.Domestique.Sexe.Homme);
+        // Get INSEE reference values for comparison.
+        // GetActivityReferenceForGenderAsync returns hours/DAY (averaged across age ranges).
+        // The user input (HeuresParSemaine) and the display layer expect hours/WEEK,
+        // so convert daily → weekly here (× 7) at the single boundary.
+        var referenceFemmeDay = await _referenceService.GetActivityReferenceForGenderAsync(response.Activite, SharedConstants.Domestique.Sexe.Femme);
+        var referenceHommeDay = await _referenceService.GetActivityReferenceForGenderAsync(response.Activite, SharedConstants.Domestique.Sexe.Homme);
+        var referenceFemme = referenceFemmeDay.HasValue ? referenceFemmeDay * 7m : null;
+        var referenceHomme = referenceHommeDay.HasValue ? referenceHommeDay * 7m : null;
 
-        response.InseeRefFemme = (decimal)(referenceFemme ?? 0);
-        response.InseeRefHomme = (decimal)(referenceHomme ?? 0);
+        // Upsert: update existing record if one exists for same person + activity
+        var existing = _context.DomestiqueResponses
+            .FirstOrDefault(r => r.Person == response.Person && r.Activite == response.Activite);
+
+        if (existing is not null)
+        {
+            existing.HeuresParSemaine = response.HeuresParSemaine;
+            existing.ValeurMonetaire = Math.Round(response.HeuresParSemaine * SharedConstants.Domestique.WeekToMonthFactor * SharedConstants.Domestique.HourlyRate, 2);
+            existing.InseeRefFemme = referenceFemme ?? 0;
+            existing.InseeRefHomme = referenceHomme ?? 0;
+            existing.CreatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            var updatedDto = new DomestiqueResponseDto
+            {
+                Id = existing.Id,
+                Person = existing.Person,
+                Activite = existing.Activite,
+                HeuresParSemaine = existing.HeuresParSemaine,
+                ValeurMonetaire = existing.ValeurMonetaire,
+                CreatedAt = existing.CreatedAt,
+                InseeReferenceFemme = referenceFemme ?? 0,
+                InseeReferenceHomme = referenceHomme ?? 0
+            };
+            Console.WriteLine($"[DomestiqueController] Updated DomestiqueResponse id={existing.Id} Person={existing.Person} Activite={existing.Activite} HeuresParSemaine={existing.HeuresParSemaine}");
+            return CreatedAtAction(nameof(GetAll), new { id = existing.Id }, updatedDto);
+        }
+
+        // New entry
+        response.CreatedAt = DateTime.UtcNow;
+        response.ValeurMonetaire = Math.Round(response.HeuresParSemaine * SharedConstants.Domestique.WeekToMonthFactor * SharedConstants.Domestique.HourlyRate, 2);
+        response.InseeRefFemme = referenceFemme ?? 0;
+        response.InseeRefHomme = referenceHomme ?? 0;
 
         _context.DomestiqueResponses.Add(response);
         await _context.SaveChangesAsync();
@@ -82,6 +121,7 @@ public class DomestiqueController : ControllerBase
             InseeReferenceHomme = referenceHomme ?? 0
         };
 
+        Console.WriteLine($"[DomestiqueController] Created DomestiqueResponse id={response.Id} Person={response.Person} Activite={response.Activite} HeuresParSemaine={response.HeuresParSemaine}");
         return CreatedAtAction(nameof(GetAll), new { id = response.Id }, responseDto);
     }
 

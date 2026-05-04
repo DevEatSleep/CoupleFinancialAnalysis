@@ -28,14 +28,16 @@ public class BotService
     };
 
     // Cached INSEE reference data (loaded from the API)
-    private Dictionary<string, (decimal InseeRefFemme, decimal InseeRefHomme)> _inseeRefsCache = new();
+    private readonly Dictionary<string, (decimal InseeRefFemme, decimal InseeRefHomme)> _inseeRefsCache = new();
 
     // Ordered list of activities for domestique questions
     private static readonly string[] DomestiqueActivites = SharedConstants.Domestique.Activities.All;
 
     // Index into DomestiqueActivites for the current domestique session
     private int _domestiqueIndex;
+    private const string Sender = "🤖 Bot";
 
+    
     public BotService(ApiClient api, ChatState state, LocalizationService loc)
     {
         _api = api;
@@ -65,17 +67,19 @@ public class BotService
 
             _inseeRefsCache.Clear();
 
-            // Group by activity and calculate average hours/week for each gender
+            // Group by activity and calculate average hours/week for each gender.
+            // DureeHeures stored in DB is in hours/DAY; multiply by 7 to express as hours/WEEK,
+            // matching the unit asked by the bot question ("hours per week").
             var grouped = references.GroupBy(r => r.Activite);
             foreach (var actGroup in grouped)
             {
                 var femmeAvg = (decimal)actGroup
                     .Where(r => r.Sexe == SharedConstants.Domestique.Sexe.Femme)
-                    .Average(r => (double)r.DureeHeures);
+                    .Average(r => (double)r.DureeHeures) * 7m;
 
                 var hommeAvg = (decimal)actGroup
                     .Where(r => r.Sexe == SharedConstants.Domestique.Sexe.Homme)
-                    .Average(r => (double)r.DureeHeures);
+                    .Average(r => (double)r.DureeHeures) * 7m;
 
                 _inseeRefsCache[actGroup.Key] = (femmeAvg, hommeAvg);
             }
@@ -120,10 +124,11 @@ public class BotService
     {
         if (_domestiqueIndex >= DomestiqueActivites.Length)
         {
-            // All domestique questions answered
+            var isWoman = _state.CurrentPersonType == SharedConstants.PersonTypes.Woman;
+            var msgKey = isWoman ? "bot.womanDomestiqueDone" : "bot.allDone";
             var name = _state.GetFirstName(_state.CurrentPersonType ?? SharedConstants.PersonTypes.Woman);
-            var msg = _loc.T("bot.allDone").Replace("{person}", name);
-            _state.AddChatMessage("🤖 Bot", msg);
+            var msg = _loc.T(msgKey).Replace("{person}", name);
+            _state.AddChatMessage(Sender, msg);
             _state.DomestiqueMode = false;
             _state.CurrentPersonType = null;
             _state.IsBotWaiting = false;
@@ -134,14 +139,16 @@ public class BotService
         var person   = _state.CurrentPersonType ?? SharedConstants.PersonTypes.Woman;
         var baseId   = person == SharedConstants.PersonTypes.Woman ? SharedConstants.QuestionIds.WomanDomestiqueBase : SharedConstants.QuestionIds.ManDomestiqueBase;
         
-        // Get cached reference values
+        // Get cached reference values (hours/week)
         var (f, h) = _inseeRefsCache.TryGetValue(activite, out var r) ? r : (0m, 0m);
+        var fStr = f.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        var hStr = h.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
 
         var text = _loc.CurrentLanguage switch
         {
-            "fr" => $"{activite} – combien d’heures par semaine consacrez-vous à cette tâche\u00a0? (Réf. INSEE\u00a0: femme ~{f}h, homme ~{h}h)",
-            "es" => $"{activite} – ¿cuántas horas a la semana? (Ref. INSEE: mujer ~{f}h, hombre ~{h}h)",
-            _    => $"{activite} – how many hours per week? (INSEE ref: woman ~{f}h, man ~{h}h)"
+            "fr" => $"{activite} – combien d’heures par semaine consacrez-vous à cette tâche\u00a0? (Réf. INSEE\u00a0: femme ~{fStr}h, homme ~{hStr}h)",
+            "es" => $"{activite} – ¿cuántas horas a la semana? (Ref. INSEE: mujer ~{fStr}h, hombre ~{hStr}h)",
+            _    => $"{activite} – how many hours per week? (INSEE ref: woman ~{fStr}h, man ~{hStr}h)"
         };
 
         _state.CurrentBotQuestion = new BotQuestion
@@ -152,7 +159,7 @@ public class BotService
             Person   = person
         };
         _state.IsBotWaiting = true;
-        _state.AddChatMessage("🤖 Bot", text);
+        _state.AddChatMessage(Sender, text);
     }
 
     public async Task StartExpenseModeAsync()
@@ -162,7 +169,7 @@ public class BotService
         _state.CurrentExpense = new Expense();
         _state.ClearChat();
 
-        _state.AddChatMessage("🤖 Bot", _loc.T("bot.welcome"));
+        _state.AddChatMessage(Sender, _loc.T("bot.welcome"));
 
         await Task.Delay(SharedConstants.Timings.ChatMessageDelayMs);
         var question = await _api.GetNextQuestionAsync("shared");
@@ -170,11 +177,11 @@ public class BotService
         {
             _state.CurrentBotQuestion = question;
             _state.IsBotWaiting = true;
-            _state.AddChatMessage("🤖 Bot", question.Text);
+            _state.AddChatMessage(Sender, question.Text);
         }
         else
         {
-            _state.AddChatMessage("🤖 Bot", _loc.T("bot.error"));
+            _state.AddChatMessage(Sender, _loc.T("bot.error"));
         }
     }
 
@@ -187,25 +194,22 @@ public class BotService
         {
             _state.CurrentBotQuestion = question;
             _state.IsBotWaiting = true;
-            _state.AddChatMessage("🤖 Bot", question.Text);
+            _state.AddChatMessage(Sender, question.Text);
         }
         else
         {
             // All questions answered
             var womanName = _state.GetFirstName("woman");
-            var manName = _state.GetFirstName("man");
 
             if (_state.CurrentPersonType == "woman")
             {
-                var msg = _loc.T("bot.allQuestionsAnswered")
-                    .Replace("{person}", womanName)
-                    .Replace("{otherPerson}", manName);
-                _state.AddChatMessage("🤖 Bot", msg);
+                var msg = _loc.T("bot.womanDoneStartMan").Replace("{person}", womanName);
+                _state.AddChatMessage(Sender, msg);
             }
             else if (_state.CurrentPersonType == SharedConstants.PersonTypes.Man)
             {
-                var msg = _loc.T("bot.allDone").Replace("{person}", manName);
-                _state.AddChatMessage("🤖 Bot", msg);
+                var msg = _loc.T("bot.manDoneStartExpenses");
+                _state.AddChatMessage(Sender, msg);
             }
             _state.CurrentPersonType = null;
             _state.IsBotWaiting = false;
@@ -217,11 +221,12 @@ public class BotService
         if (string.IsNullOrWhiteSpace(content))
             return;
 
-        var lower = content.ToLowerInvariant();
+        var lower = content.ToLowerInvariant().Trim();
         var yesCmd = _loc.T("commands.yes").ToLowerInvariant();
         var doneCmd = _loc.T("commands.done").ToLowerInvariant();
         var isYes = lower == "yes" || lower == yesCmd;
-        var isDone = lower == "done" || lower == doneCmd;
+        // Accept explicit 'stop' as an additional finish command (works across locales)
+        var isDone = lower == "done" || lower == doneCmd || lower == "stop";
 
         // Only allow messages when bot is waiting or expense mode
         if (!_state.IsBotWaiting && !_state.ExpenseMode)
@@ -233,9 +238,9 @@ public class BotService
             if (isDone)
             {
                 _state.AddChatMessage(_state.CurrentUser, content);
-                _state.AddChatMessage("🤖 Bot", _loc.T("bot.expenseFinished"));
                 _state.ExpenseMode = false;
                 _state.CurrentExpense = new Expense();
+                _state.AddChatMessage(Sender, _loc.T("bot.expensesDoneStartDomestique"));
                 return;
             }
             else if (isYes)
@@ -297,7 +302,7 @@ public class BotService
                             .Replace("{paidBy}", _state.CurrentExpense.PaidBy);
 
                         _state.AddChatMessage(_state.CurrentUser, response);
-                        _state.AddChatMessage("🤖 Bot", msg);
+                        _state.AddChatMessage(Sender, msg);
                         _state.CurrentExpense = new Expense();
                         _state.IsBotWaiting = false;
                         _state.CurrentBotQuestion = null;
@@ -323,35 +328,39 @@ public class BotService
                 heures = 0m;
 
             // Simply pass person, activity, and hours; the backend handles reference lookup
-            try
-            {
-                var saveSuccess = await _api.SaveDomestiqueAsync(mapping.Person, mapping.Activite, heures);
-                if (!saveSuccess)
+                try
                 {
+                    Console.WriteLine($"[BotService] Saving domestique: person={mapping.Person}, activite={mapping.Activite}, heures={heures}");
+                    var saveSuccess = await _api.SaveDomestiqueAsync(mapping.Person, mapping.Activite, heures);
+                    Console.WriteLine($"[BotService] SaveDomestiqueAsync returned: {saveSuccess}");
+                    if (!saveSuccess)
+                    {
+                        _state.AddChatMessage(_state.CurrentUser, response);
+                        _state.AddChatMessage(Sender, _loc.T("bot.error"));
+                        _state.IsBotWaiting = false;
+                        _state.CurrentBotQuestion = null;
+                        _state.NotifyStateChanged();
+                        return;
+                    }
+
                     _state.AddChatMessage(_state.CurrentUser, response);
-                    _state.AddChatMessage("🤖 Bot", _loc.T("bot.error"));
+                    _state.DomestiqueData = await _api.GetDomestiqueAsync();
+                    Console.WriteLine($"[BotService] Retrieved domestique items: {_state.DomestiqueData?.Count ?? 0}");
+                    _state.IsBotWaiting = false;
+                    _state.CurrentBotQuestion = null;
+                    _state.NotifyStateChanged();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[BotService] Error saving domestique: {ex}");
+                    System.Diagnostics.Debug.WriteLine($"Error saving domestique data: {ex.Message}");
+                    _state.AddChatMessage(_state.CurrentUser, response);
+                    _state.AddChatMessage(Sender, _loc.T("bot.error"));
                     _state.IsBotWaiting = false;
                     _state.CurrentBotQuestion = null;
                     _state.NotifyStateChanged();
                     return;
                 }
-
-                _state.AddChatMessage(_state.CurrentUser, response);
-                _state.DomestiqueData = await _api.GetDomestiqueAsync();
-                _state.IsBotWaiting = false;
-                _state.CurrentBotQuestion = null;
-                _state.NotifyStateChanged();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error saving domestique data: {ex.Message}");
-                _state.AddChatMessage(_state.CurrentUser, response);
-                _state.AddChatMessage("🤖 Bot", _loc.T("bot.error"));
-                _state.IsBotWaiting = false;
-                _state.CurrentBotQuestion = null;
-                _state.NotifyStateChanged();
-                return;
-            }
 
             _domestiqueIndex++;
             await Task.Delay(SharedConstants.Timings.ChatMessageDelayMs);

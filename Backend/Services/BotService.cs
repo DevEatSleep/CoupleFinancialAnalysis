@@ -20,7 +20,7 @@ public class BotService
     private int _womanQuestionIndex = 0;
     private int _manQuestionIndex = 0;
     private int _sharedQuestionIndex = 0;
-    private string _questionsBasePath;
+    private readonly string _questionsBasePath;
     private string _currentLanguage = SharedConstants.Languages.English;
 
     public BotService(string questionsFilePath)
@@ -83,15 +83,15 @@ public class BotService
             var json = File.ReadAllText(langFilePath);
             using (JsonDocument doc = JsonDocument.Parse(json))
             {
-                var questions = doc.RootElement.GetProperty(Constants.JsonProperties.Questions);
+                var questions = doc.RootElement.GetProperty(SharedConstants.JsonProperties.Questions);
                 foreach (var q in questions.EnumerateArray())
                 {
                     _questions.Add(new Question
                     {
-                        Id = q.GetProperty(Constants.JsonProperties.Id).GetInt32(),
-                        Text = q.GetProperty(Constants.JsonProperties.Text).GetString() ?? "",
-                        Category = q.GetProperty(Constants.JsonProperties.Category).GetString() ?? "",
-                        Person = q.TryGetProperty(Constants.JsonProperties.Person, out var person) ? person.GetString() ?? "" : ""
+                        Id = q.GetProperty(SharedConstants.JsonProperties.Id).GetInt32(),
+                        Text = q.GetProperty(SharedConstants.JsonProperties.Text).GetString() ?? "",
+                        Category = q.GetProperty(SharedConstants.JsonProperties.Category).GetString() ?? "",
+                        Person = q.TryGetProperty(SharedConstants.JsonProperties.Person, out var person) ? person.GetString() ?? "" : ""
                     });
                 }
             }
@@ -114,18 +114,31 @@ public class BotService
 
     public Question? GetNextQuestionForPerson(string person)
     {
-        var personQuestions = _questions.Where(q => q.Person == person).OrderBy(q => q.Id).ToList();
+        // Exclude travail_domestique questions — those are handled entirely by the frontend domestique flow
+        var personQuestions = _questions
+            .Where(q => q.Person == person && q.Category != SharedConstants.QuestionCategories.TravailDomestique)
+            .OrderBy(q => q.Id)
+            .ToList();
         
         if (personQuestions.Count == 0)
             return null;
+
+        // Shared questions (expenses) are a repeating flow: allow cycling so users can add
+        // multiple expenses by replying "yes". Personal questions remain single-run.
+        if (person == SharedConstants.PersonTypes.Shared)
+        {
+            // Cycle through available shared questions (wrap-around)
+            var idx = _sharedQuestionIndex % personQuestions.Count;
+            var selectedQuestion = personQuestions[idx];
+            _sharedQuestionIndex = (_sharedQuestionIndex + 1) % personQuestions.Count;
+            return selectedQuestion;
+        }
 
         int index;
         if (person == SharedConstants.PersonTypes.Woman)
             index = _womanQuestionIndex;
         else if (person == SharedConstants.PersonTypes.Man)
             index = _manQuestionIndex;
-        else if (person == SharedConstants.PersonTypes.Shared)
-            index = _sharedQuestionIndex;
         else
             return null;
         
@@ -138,8 +151,6 @@ public class BotService
             _womanQuestionIndex++;
         else if (person == SharedConstants.PersonTypes.Man)
             _manQuestionIndex++;
-        else if (person == SharedConstants.PersonTypes.Shared)
-            _sharedQuestionIndex++;
 
         return question;
     }

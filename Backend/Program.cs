@@ -1,8 +1,6 @@
-using CoupleChat;
 using CoupleChat.Data;
 using CoupleChat.Models;
 using CoupleChat.Services;
-using CoupleChat.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Shared;
 
@@ -34,7 +32,6 @@ builder.Services.AddScoped<DomestiqueReferenceService>();
 // Bot Services
 var questionsPath = Path.Combine(Directory.GetCurrentDirectory(), Constants.Paths.QuestionsDirectory);
 builder.Services.AddSingleton(new BotService(questionsPath));
-builder.Services.AddSingleton(new NlpProcessor(Path.Combine(Directory.GetCurrentDirectory(), "questions.json")));
 
 // Swagger
 builder.Services.AddSwaggerGen();
@@ -63,10 +60,10 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
     // EnsureCreated will create all tables based on DbContext configuration, including DomestiqueResponses
-    db.Database.EnsureCreated();
+    await db.Database.EnsureCreatedAsync();
 
     // Seed reference data if table is empty
-    if (!db.TravailDomestique.Any())
+    if (!await db.TravailDomestique.AnyAsync())
     {
         // INSEE reference data: (activity, age range, femme minutes, homme minutes)
         var donneesInsee = new (string, string, int, int)[]
@@ -116,9 +113,9 @@ using (var scope = app.Services.CreateScope())
             }
         }
 
-        db.SaveChanges();
+        await db.SaveChangesAsync();
     }
 }
 
-app.Run(Constants.Network.ServerUrl);
+await app.RunAsync(Constants.Network.ServerUrl);
 

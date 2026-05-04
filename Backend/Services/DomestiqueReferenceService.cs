@@ -1,9 +1,6 @@
 using CoupleChat.Data;
-using CoupleChat.Models;
 using CoupleChat.Models.Dto;
-using CoupleChat.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Shared;
 using SharedConstants = Shared.Constants;
 
 namespace CoupleChat.Services;

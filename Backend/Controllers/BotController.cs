@@ -12,13 +12,11 @@ namespace CoupleChat.Controllers;
 public class BotController : ControllerBase
 {
     private readonly BotService _botService;
-    private readonly NlpProcessor _nlpProcessor;
     private readonly ChatDbContext _context;
 
-    public BotController(BotService botService, NlpProcessor nlpProcessor, ChatDbContext context)
+    public BotController(BotService botService, ChatDbContext context)
     {
-        _botService = botService;
-        _nlpProcessor = nlpProcessor;
+        _botService = botService;       
         _context = context;
     }
 
@@ -58,7 +56,7 @@ public class BotController : ControllerBase
             if (question == null)
                 return BadRequest("Question not found");
 
-            string extractedTag = _nlpProcessor.ExtractTag(request.UserResponse, question.Text);
+            string extractedTag = request.UserResponse;
             Console.WriteLine($"[BotController] Extracted tag: {extractedTag}");
 
             var response = new Response
