@@ -42,6 +42,9 @@ var app = builder.Build();
 app.UseRouting();
 app.UseCors(Constants.Network.CorsPolicyName);
 
+// Serve static files from wwwroot (Frontend)
+app.UseStaticFiles();
+
 // Swagger/OpenAPI
 app.UseSwagger();
 app.UseSwaggerUI(options =>

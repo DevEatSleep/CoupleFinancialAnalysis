@@ -32,15 +32,24 @@ public static class Constants
     public static class Network
     {
         public const string CorsPolicyName = "AllowFrontend";
-        public const string ServerUrl = "http://localhost:5000";
         
-        public static readonly string[] AllowedOrigins = new[]
-        {
-            "http://localhost:5000",
-            "http://127.0.0.1:5000",
-            "http://localhost:3000",
-            "http://127.0.0.1:3000"
-        };
+        // Server URL for API calls from Frontend
+        // Uses relative path (/) for Azure, or localhost for local dev
+        public static string ServerUrl => IsProduction ? "/" : "http://localhost:5000";
+        
+        // Allowed origins for CORS
+        public static string[] AllowedOrigins => IsProduction
+            ? new[] { "https://couple-financial-app.azurewebsites.net" }
+            : new[]
+            {
+                "http://localhost:5000",
+                "http://127.0.0.1:5000",
+                "http://localhost:3000",
+                "http://127.0.0.1:3000"
+            };
+        
+        private static bool IsProduction =>
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
     }
 
     /// <summary>
