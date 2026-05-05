@@ -64,6 +64,9 @@ app.MapControllers();
 // Health check
 app.MapGet(Constants.Routes.Health, () => Constants.Routes.HealthResponse);
 
+// SPA fallback - serve index.html for all non-API routes (Blazor WebAssembly routing)
+app.MapFallbackToFile("index.html");
+
 // Database initialization
 using (var scope = app.Services.CreateScope())
 {
