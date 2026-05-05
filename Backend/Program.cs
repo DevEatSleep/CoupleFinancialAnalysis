@@ -6,6 +6,20 @@ using Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure URLs for Azure
+var isProduction = builder.Environment.IsProduction();
+if (isProduction)
+{
+    // On Azure, listen on all interfaces and the PORT environment variable (default 8080)
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+else
+{
+    // Local development
+    builder.WebHost.UseUrls("http://localhost:5000");
+}
+
 // Add services
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
