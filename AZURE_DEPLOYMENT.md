@@ -9,6 +9,11 @@
 4. Cliquez **Create**
 
 ### Configuration recommandée (FREE tier)
+
+**Sélectionnez : "App Service" (Application Web), PAS "Web App + Database"**
+
+Votre app utilise **SQLite** (BD fichier intégrée), donc pas besoin d'Azure SQL Database séparé.
+
 - **Name** : `couple-financial-app` (ou autre, doit être unique)
 - **Runtime stack** : `.NET 10`
 - **Operating System** : `Linux`
@@ -20,6 +25,42 @@
     - 10 GB stockage
 
 ⚠️ **Limitation Free tier** : L'app s'endort après inactivité, redémarrage lent. OK pour développement.
+
+**Pourquoi pas "Web App + Database" ?**
+- Ajoute une Azure SQL Database = +5€/mois minimum
+- Votre app a déjà SQLite intégré (gratuit, persiste dans le répertoire)
+
+---
+
+## Étape 1.5 : Activer l'authentification de base (IMPORTANT ⚠️)
+
+### ❌ Si vous avez l'erreur "Basic Authentication not enabled"
+
+L'authentification de base doit être **activée** pour permettre le déploiement GitHub :
+
+1. Allez à [portal.azure.com](https://portal.azure.com) → Votre **App Service**
+2. À gauche, sous **Deployment**, cliquez **Deployment slots** (ou **Deployment center**)
+3. Cliquez sur **Edit** ou **Settings** pour les paramètres de déploiement
+4. Dans **General settings**, cherchez **Basic Authentication** (ou **Deployment / SCM Settings**)
+5. **Activez** : `On` ✅
+
+**Alternative via PowerShell (plus rapide)** :
+
+```powershell
+# Remplacez par votre resource group et app name
+$resourceGroup = "votre-resource-group"
+$appName = "couple-financial-app"
+
+az resource update --resource-group $resourceGroup `
+  --name $appName `
+  --resource-type "Microsoft.Web/sites" `
+  --set properties.siteConfig.basicPublishingCredentialsPolicyEnabled=true
+```
+
+Ou dans le portail Azure directement :
+- App Service → **Settings** → **Configuration** → **General settings**
+- Cherchez **SCM Basic Auth Publishing Credentials**
+- Mettez sur **On** ✅
 
 ---
 
@@ -71,6 +112,8 @@ Si vous ciblez Windows, créez `Backend/web.config` :
   </system.webServer>
 </configuration>
 ```
+arret ici
+
 
 **OU** sur Linux (recommandé, plus léger) : Pas besoin, créez `.deployment` à la racine :
 
