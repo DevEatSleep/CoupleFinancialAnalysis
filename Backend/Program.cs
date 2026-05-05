@@ -6,11 +6,11 @@ using Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure URLs for Azure - check environment variable directly
-var aspnetcoreEnv = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-var isProduction = aspnetcoreEnv.Equals("Production", StringComparison.OrdinalIgnoreCase);
+// Configure URLs for Azure - detect if running on Azure App Service
+// WEBSITE_INSTANCE_ID is only set on Azure App Service
+var isAzure = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID"));
 
-if (isProduction)
+if (isAzure)
 {
     // On Azure, listen on all interfaces and the PORT environment variable (default 8080)
     var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
