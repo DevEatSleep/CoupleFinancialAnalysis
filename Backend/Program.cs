@@ -120,5 +120,5 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-await app.RunAsync(Constants.Network.ServerUrl);
+await app.RunAsync();
 

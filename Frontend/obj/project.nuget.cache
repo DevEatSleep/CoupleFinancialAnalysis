@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Ti8BpDmLRF0=",
+  "dgSpecHash": "Iyn5M1hPlW0=",
   "success": true,
   "projectFilePath": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj",
   "expectedPackageFiles": [
@@ -13,7 +13,6 @@
     "C:\\Users\\VerdierThierry\\.nuget\\packages\\microsoft.aspnetcore.components.webassembly\\10.0.5\\microsoft.aspnetcore.components.webassembly.10.0.5.nupkg.sha512",
     "C:\\Users\\VerdierThierry\\.nuget\\packages\\microsoft.aspnetcore.components.webassembly.devserver\\10.0.5\\microsoft.aspnetcore.components.webassembly.devserver.10.0.5.nupkg.sha512",
     "C:\\Users\\VerdierThierry\\.nuget\\packages\\microsoft.aspnetcore.metadata\\10.0.5\\microsoft.aspnetcore.metadata.10.0.5.nupkg.sha512",
-    "C:\\Users\\VerdierThierry\\.nuget\\packages\\microsoft.dotnet.hotreload.webassembly.browser\\10.0.203\\microsoft.dotnet.hotreload.webassembly.browser.10.0.203.nupkg.sha512",
     "C:\\Users\\VerdierThierry\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.5\\microsoft.extensions.configuration.10.0.5.nupkg.sha512",
     "C:\\Users\\VerdierThierry\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.5\\microsoft.extensions.configuration.abstractions.10.0.5.nupkg.sha512",
     "C:\\Users\\VerdierThierry\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.5\\microsoft.extensions.configuration.binder.10.0.5.nupkg.sha512",
