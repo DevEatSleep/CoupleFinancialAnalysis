@@ -19,16 +19,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-    
-    - name: Publish Frontend
-      run: dotnet publish Frontend/Frontend.csproj --configuration Release --output ./frontend-publish
-    
-    - name: Copy Frontend files to Backend wwwroot
-      run: |
-        mkdir -p Backend/wwwroot
-        cp -r ./frontend-publish/wwwroot/* Backend/wwwroot/
+    - name: Publish Frontend directly to Backend wwwroot
+      run: dotnet publish Frontend/Frontend.csproj --configuration Release --output ./Backend/wwwroot
     
     - name: Publish Backend with integrated Frontend
       run: dotnet publish Backend/CoupleChat.csproj --configuration Release --output ./backend-publish
