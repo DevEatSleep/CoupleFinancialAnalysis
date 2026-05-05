@@ -6,21 +6,11 @@ using Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure URLs for Azure - detect if running on Azure App Service
-// WEBSITE_INSTANCE_ID is only set on Azure App Service
-var isAzure = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID"));
-
-if (isAzure)
-{
-    // On Azure, listen on all interfaces and the PORT environment variable (default 8080)
-    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-}
-else
-{
-    // Local development
-    builder.WebHost.UseUrls("http://localhost:5000");
-}
+// Configure URLs for both local and Azure
+// Azure sets PORT environment variable (default 8080)
+// Local development uses 5000
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services
 builder.Services.AddControllers().AddJsonOptions(options =>
