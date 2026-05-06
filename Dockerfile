@@ -7,7 +7,7 @@ COPY . .
 # Restore and publish
 RUN cd Backend && dotnet publish -c Release -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/runtime:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
