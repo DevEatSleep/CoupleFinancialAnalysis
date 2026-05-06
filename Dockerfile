@@ -1,40 +1,29 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS frontend-build
 WORKDIR /src
+COPY Frontend ./Frontend
+COPY Shared ./Shared
+RUN cd Frontend && dotnet publish -c Release -o /frontend-out
 
-# Copy solution and projects
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
+WORKDIR /src
 COPY . .
-
-# Restore and build solution
 RUN dotnet restore
-
-# Publish Frontend WebAssembly app
-RUN cd Frontend && \
-    dotnet publish -c Release -o /frontend-dist
-
-# Ensure Backend has wwwroot directory
-RUN mkdir -p Backend/wwwroot
-
-# Copy ENTIRE Frontend publish output (including _framework) to Backend wwwroot
-# The Frontend publish creates dist/wwwroot with all necessary files
-RUN cp -rv /frontend-dist/wwwroot/* Backend/wwwroot/
-
-# Verify files exist
-RUN echo "=== Backend wwwroot contents ===" && \
-    find Backend/wwwroot -type f | head -20 && \
-    echo "=== Checking for _framework ===" && \
-    ls -la Backend/wwwroot/_framework/ 2>&1 | head -5
-
-# Publish Backend with Frontend files embedded
-RUN cd Backend && dotnet publish -c Release -o /app/publish
-
-# Verify final output
-RUN echo "=== Final publish wwwroot ===" && \
-    ls -la /app/publish/wwwroot/ && \
-    ls -la /app/publish/wwwroot/_framework/ 2>&1 | head -5
+RUN cd Backend && dotnet publish -c Release -o /backend-out
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
-COPY --from=build /app/publish .
+
+# Copy Backend published files
+COPY --from=backend-build /backend-out .
+
+# Copy Frontend WebAssembly files directly from frontend build
+COPY --from=frontend-build /frontend-out/wwwroot ./wwwroot
+
+# Verify files exist
+RUN echo "=== wwwroot contents ===" && \
+    ls -la wwwroot/ && \
+    echo "=== _framework contents ===" && \
+    ls -la wwwroot/_framework/ 2>&1 | head -10
 
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "CoupleChat.dll"]
