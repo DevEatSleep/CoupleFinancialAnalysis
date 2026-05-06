@@ -2,30 +2,31 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS frontend-build
 WORKDIR /src
 COPY Frontend ./Frontend
 COPY Shared ./Shared
-RUN cd Frontend && dotnet publish -c Release -o /dist
-# Verify the published structure
-RUN echo "=== Frontend publish output ===" && find /dist -type d | head -20 && echo "=== Checking for _framework ===" && ls -la /dist/wwwroot/_framework/ 2>&1 | head -5
+RUN cd Frontend && dotnet publish -c Release
+
+# Check where files ended up
+RUN echo "=== Looking for Frontend dist ===" && find /src/Frontend -name "wwwroot" -type d && find /src/Frontend -name "icudt_EFIGS*" 2>/dev/null | head -5
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 WORKDIR /src
 COPY . .
+# Pre-create wwwroot before building
+RUN mkdir -p Backend/wwwroot
 RUN dotnet restore
-RUN cd Backend && dotnet publish -c Release -o /backend-dist
+RUN cd Backend && dotnet publish -c Release
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 
-# Copy Backend publish
-COPY --from=backend-build /backend-dist .
+# Copy everything from Backend publish
+COPY --from=backend-build /src/Backend/bin/Release/net10.0/publish .
 
-# Ensure wwwroot exists
-RUN mkdir -p wwwroot
+# Now overlay Frontend files from the frontend-build stage
+# Copy entire dist folder - Frontend publishes to bin/Release/net10.0/publish
+COPY --from=frontend-build /src/Frontend/bin/Release/net10.0/publish/wwwroot ./wwwroot
 
-# Copy Frontend dist - copy the entire wwwroot including _framework
-RUN cp -rv /dist/wwwroot/* wwwroot/ || echo "Copy may have warnings"
-
-# Final verification
-RUN echo "=== Final wwwroot ===" && ls -la wwwroot/ && echo "=== Final _framework ===" && ls -la wwwroot/_framework/ 2>&1 | head -10
+# Verify files
+RUN echo "=== Final wwwroot structure ===" && ls -la wwwroot/ && echo "=== _framework files ===" && ls -la wwwroot/_framework/ 2>&1 | grep -i "icudt\|total" || echo "NO FRAMEWORK FILES FOUND!"
 
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "CoupleChat.dll"]
