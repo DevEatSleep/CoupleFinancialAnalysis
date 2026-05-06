@@ -1,10 +1,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
-# Copy the solution and project files
+# Copy the entire solution
 COPY . .
 
-# Restore and publish
+# Build the Frontend Blazor WebAssembly
+RUN cd Frontend && dotnet publish -c Release -o /app/frontend-publish
+
+# Copy Frontend dist files to Backend wwwroot
+RUN cp -r /app/frontend-publish/wwwroot/* Backend/wwwroot/
+
+# Publish Backend with Frontend files included
 RUN cd Backend && dotnet publish -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
