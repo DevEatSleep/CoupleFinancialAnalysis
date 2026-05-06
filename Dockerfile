@@ -5,10 +5,10 @@ WORKDIR /app
 COPY . .
 
 # Build the Frontend Blazor WebAssembly
-RUN cd Frontend && dotnet publish -c Release -o /app/frontend-publish
+RUN cd Frontend && dotnet publish -c Release -o /frontend-dist
 
-# Copy Frontend dist files to Backend wwwroot
-RUN cp -r /app/frontend-publish/wwwroot/* Backend/wwwroot/
+# Create wwwroot in Backend and copy Frontend dist
+RUN mkdir -p Backend/wwwroot && cp -r /frontend-dist/wwwroot/* Backend/wwwroot/
 
 # Publish Backend with Frontend files included
 RUN cd Backend && dotnet publish -c Release -o /app/publish
