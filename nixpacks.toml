@@ -1,5 +1,0 @@
-[build]
-providers = ["dotnet"]
-
-[variables]
-NIXPACKS_DOTNET_SDK_VERSION = "9.0"

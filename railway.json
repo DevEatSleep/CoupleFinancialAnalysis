@@ -8,5 +8,8 @@
     "startCommand": "cd Backend/out && dotnet CoupleChat.dll",
     "restartPolicyType": "on_failure",
     "restartPolicyMaxRetries": 5
+  },
+  "variables": {
+    "RAILPACK_DOTNET_VERSION": "10.0"
   }
 }
