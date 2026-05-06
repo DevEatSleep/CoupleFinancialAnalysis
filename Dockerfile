@@ -1,36 +1,40 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-# Copy the entire solution
+# Copy solution and projects
 COPY . .
 
-# Build the Frontend Blazor WebAssembly
-RUN cd Frontend && dotnet publish -c Release -o /frontend-dist
+# Restore and build solution
+RUN dotnet restore
 
-# Verify Frontend files exist
-RUN ls -la /frontend-dist/
+# Publish Frontend WebAssembly app
+RUN cd Frontend && \
+    dotnet publish -c Release -o /frontend-dist
 
-# Create wwwroot in Backend and copy ALL Frontend dist files
-RUN mkdir -p Backend/wwwroot && \
-    cp -r /frontend-dist/wwwroot/* Backend/wwwroot/ && \
-    ls -la Backend/wwwroot/ && \
-    ls -la Backend/wwwroot/_framework/ 2>/dev/null || echo "Framework not found yet"
+# Ensure Backend has wwwroot directory
+RUN mkdir -p Backend/wwwroot
 
-# Publish Backend with Frontend files included
-RUN cd Backend && dotnet publish -c Release -o /app/publish && \
+# Copy ENTIRE Frontend publish output (including _framework) to Backend wwwroot
+# The Frontend publish creates dist/wwwroot with all necessary files
+RUN cp -rv /frontend-dist/wwwroot/* Backend/wwwroot/
+
+# Verify files exist
+RUN echo "=== Backend wwwroot contents ===" && \
+    find Backend/wwwroot -type f | head -20 && \
+    echo "=== Checking for _framework ===" && \
+    ls -la Backend/wwwroot/_framework/ 2>&1 | head -5
+
+# Publish Backend with Frontend files embedded
+RUN cd Backend && dotnet publish -c Release -o /app/publish
+
+# Verify final output
+RUN echo "=== Final publish wwwroot ===" && \
     ls -la /app/publish/wwwroot/ && \
-    ls -la /app/publish/wwwroot/_framework/ 2>/dev/null || echo "Framework missing in publish"
+    ls -la /app/publish/wwwroot/_framework/ 2>&1 | head -5
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Verify files in runtime image
-RUN ls -la /app/wwwroot/ && \
-    ls -la /app/wwwroot/_framework/ 2>/dev/null || echo "Framework not found in runtime"
-
-# Expose port
 EXPOSE 8080
-
-# Run the application
 ENTRYPOINT ["dotnet", "CoupleChat.dll"]
