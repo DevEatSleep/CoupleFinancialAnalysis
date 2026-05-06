@@ -45,6 +45,9 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Middleware
+// Serve Blazor WebAssembly framework files (must be before routing/static files)
+app.UseBlazorFrameworkFiles();
+
 app.UseRouting();
 app.UseCors(Constants.Network.CorsPolicyName);
 
