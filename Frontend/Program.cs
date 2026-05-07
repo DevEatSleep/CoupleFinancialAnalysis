@@ -4,6 +4,8 @@ using Frontend;
 using Frontend.Services;
 using Shared;
 
+
+
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
