@@ -11,7 +11,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // HttpClient for API calls → backend
 builder.Services.AddHttpClient("Api", client =>
 {
-    client.BaseAddress = new Uri(Constants.Network.ServerUrl);
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
 });
 
 // HttpClient for local static files (locale JSON)
