@@ -19,10 +19,10 @@ public class AuthService
     {
         try
         {
-            var response = await _http.PostAsJsonAsync($"{Constants.Network.ServerUrl}/api/auth/register", request);
+            var response = await _http.PostAsJsonAsync(Constants.ApiEndpoints.AuthRegister, request);
             if (response.IsSuccessStatusCode)
                 return await response.Content.ReadFromJsonAsync<AuthResponse>();
-            
+
             var error = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Register failed: {response.StatusCode} - {error}");
             return null;
@@ -38,7 +38,7 @@ public class AuthService
     {
         try
         {
-            var response = await _http.PostAsJsonAsync($"{Constants.Network.ServerUrl}/api/auth/login", request);
+            var response = await _http.PostAsJsonAsync(Constants.ApiEndpoints.AuthLogin, request);
             if (response.IsSuccessStatusCode)
                 return await response.Content.ReadFromJsonAsync<AuthResponse>();
             return null;
@@ -54,7 +54,7 @@ public class AuthService
         try
         {
             var request = new { token };
-            var response = await _http.PostAsJsonAsync($"{Constants.Network.ServerUrl}/api/auth/verify", request);
+            var response = await _http.PostAsJsonAsync(Constants.ApiEndpoints.AuthVerify, request);
             if (response.IsSuccessStatusCode)
                 return await response.Content.ReadFromJsonAsync<AuthResponse>();
             return null;
@@ -104,14 +104,11 @@ public class AuthService
                 return false;
 
             var request = new { token = _currentToken, password };
-            var response = await _http.DeleteAsync($"{Constants.Network.ServerUrl}/api/auth/delete-account");
-            
-            // For DELETE with body, we need to use a custom method
-            var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, $"{Constants.Network.ServerUrl}/api/auth/delete-account")
+            var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, Constants.ApiEndpoints.AuthDeleteAccount)
             {
                 Content = JsonContent.Create(request)
             };
-            
+
             var deleteResponse = await _http.SendAsync(deleteRequest);
             return deleteResponse.IsSuccessStatusCode;
         }
@@ -135,7 +132,7 @@ public class AuthService
                 CurrentPassword = currentPassword,
                 NewPassword = newPassword
             };
-            var response = await _http.PostAsJsonAsync($"{Constants.Network.ServerUrl}/api/auth/change-password", request);
+            var response = await _http.PostAsJsonAsync(Constants.ApiEndpoints.AuthChangePassword, request);
             if (response.IsSuccessStatusCode)
                 return (true, "");
 

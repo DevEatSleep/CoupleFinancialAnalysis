@@ -207,6 +207,8 @@ public static class Constants
         public const string AuthRegister = "api/auth/register";
         public const string AuthLogin = "api/auth/login";
         public const string AuthVerify = "api/auth/verify";
+        public const string AuthChangePassword = "api/auth/change-password";
+        public const string AuthDeleteAccount = "api/auth/delete-account";
 
         // Bot endpoints
         public const string BotNextQuestion = "api/bot/next-question";
