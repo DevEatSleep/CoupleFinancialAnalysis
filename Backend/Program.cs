@@ -59,8 +59,18 @@ builder.Services.AddCors(options =>
 });
 
 // Database
-var dbConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
-    ?? "Host=localhost;Port=5432;Database=couplefinancial;Username=postgres;Password=postgres";
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+string dbConnectionString;
+if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgresql://"))
+{
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    dbConnectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]}";
+}
+else
+{
+    dbConnectionString = databaseUrl ?? "Host=localhost;Port=5432;Database=couplefinancial;Username=postgres;Password=postgres";
+}
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseNpgsql(dbConnectionString));
 
