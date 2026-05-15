@@ -4,6 +4,7 @@ using CoupleChat.Models;
 using CoupleChat.Models.Dto;
 using CoupleChat.Services;
 using CoupleChat.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 using SharedConstants = Shared.Constants;
@@ -15,6 +16,7 @@ namespace CoupleChat.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class DomestiqueController : ControllerBase
 {
     private readonly ChatDbContext _context;
@@ -26,6 +28,15 @@ public class DomestiqueController : ControllerBase
         _referenceService = referenceService;
     }
 
+    private int GetCoupleId()
+    {
+        var coupleIdObj = HttpContext.Items["CoupleId"];
+        if (coupleIdObj is int coupleId)
+            return coupleId;
+
+        throw new UnauthorizedAccessException("CoupleId not found in token");
+    }
+
     /// <summary>
     /// Get all user-declared domestic work responses.
     /// </summary>
@@ -33,8 +44,11 @@ public class DomestiqueController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<DomestiqueResponse>> GetAll()
     {
+        var coupleId = GetCoupleId();
         Console.WriteLine("[DomestiqueController] GET /api/domestique called");
-        var items = _context.DomestiqueResponses.ToList();
+        var items = _context.DomestiqueResponses
+            .Where(r => r.CoupleId == coupleId)
+            .ToList();
         Console.WriteLine($"[DomestiqueController] Retrieved {items.Count} DomestiqueResponses");
         foreach (var item in items)
             item.ValeurMonetaire = Math.Round(item.ValeurMonetaire, 2);
@@ -51,6 +65,7 @@ public class DomestiqueController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<DomestiqueResponseDto>> Create([FromBody] DomestiqueResponse response)
     {
+        var coupleId = GetCoupleId();
         Console.WriteLine($"[DomestiqueController] POST /api/domestique called with Person={(response?.Person ?? "(null)" )}, Activite={(response?.Activite ?? "(null)" )}, HeuresParSemaine={(response != null ? response.HeuresParSemaine.ToString() : "(null)")}");
         // Validate input
         if (response == null || string.IsNullOrWhiteSpace(response.Person) || string.IsNullOrWhiteSpace(response.Activite))
@@ -73,7 +88,7 @@ public class DomestiqueController : ControllerBase
 
         // Upsert: update existing record if one exists for same person + activity
         var existing = _context.DomestiqueResponses
-            .FirstOrDefault(r => r.Person == response.Person && r.Activite == response.Activite);
+            .FirstOrDefault(r => r.Person == response.Person && r.Activite == response.Activite && r.CoupleId == coupleId);
 
         if (existing is not null)
         {
@@ -101,6 +116,7 @@ public class DomestiqueController : ControllerBase
 
         // New entry
         response.CreatedAt = DateTime.UtcNow;
+        response.CoupleId = coupleId;
         response.ValeurMonetaire = Math.Round(response.HeuresParSemaine * SharedConstants.Domestique.WeekToMonthFactor * SharedConstants.Domestique.HourlyRate, 2);
         response.InseeRefFemme = referenceFemme ?? 0;
         response.InseeRefHomme = referenceHomme ?? 0;
@@ -133,8 +149,10 @@ public class DomestiqueController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
+        var coupleId = GetCoupleId();
         var item = await _context.DomestiqueResponses.FindAsync(id);
-        if (item == null) return NotFound();
+        if (item == null || item.CoupleId != coupleId)
+            return NotFound();
         
         _context.DomestiqueResponses.Remove(item);
         await _context.SaveChangesAsync();

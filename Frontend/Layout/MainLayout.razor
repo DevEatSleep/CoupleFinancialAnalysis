@@ -1,3 +1,360 @@
 ﻿@inherits LayoutComponentBase
+@using Frontend.Services
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
 
-@Body
+<div class="main-layout">
+    <header class="navbar">
+        <div class="navbar-brand">
+            <h1>💑 Couple Financial Analysis</h1>
+        </div>
+        <div class="navbar-menu">
+            @if (CurrentUser != null)
+            {
+                <span class="user-info">
+                    👤 @CurrentUser.Name (@CurrentUser.Email)
+                </span>
+                <button class="btn-settings" @onclick="ShowSettings">⚙️ Paramètres</button>
+                <button class="btn-logout" @onclick="Logout">Déconnexion</button>
+            }
+        </div>
+    </header>
+    
+    <main class="content">
+        @Body
+    </main>
+</div>
+
+@if (ShowSettingsModal)
+{
+    <div class="modal-overlay" @onclick="() => ShowSettingsModal = false">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h2>Paramètres du compte</h2>
+                <button class="btn-close" @onclick="() => ShowSettingsModal = false">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Attention: Cette action est irréversible.</p>
+                <button class="btn-delete-account" @onclick="ConfirmDelete">🗑️ Supprimer mon compte</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (ShowConfirmModal)
+{
+    <div class="modal-overlay">
+        <div class="modal-content modal-danger">
+            <div class="modal-header">
+                <h2>Confirmer la suppression</h2>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer votre compte? Cette action est <strong>irréversible</strong>.</p>
+                <div class="form-group">
+                    <label for="password">Confirmer en entrant votre mot de passe:</label>
+                    <input id="password" type="password" class="form-control" @bind="ConfirmPassword" placeholder="Mot de passe" />
+                </div>
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="alert alert-danger">@ErrorMessage</div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="() => { ShowConfirmModal = false; ConfirmPassword = string.Empty; ErrorMessage = string.Empty; }">Annuler</button>
+                <button class="btn btn-danger" @onclick="DeleteAccount" disabled="@IsDeleting">
+                    @if (IsDeleting) { <span>Suppression...</span> } else { <span>Supprimer définitivement</span> }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .main-layout {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .navbar-brand h1 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .navbar-menu {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-info {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255,255,255,0.2);
+        border-radius: 4px;
+    }
+
+    .btn-logout {
+        padding: 0.5rem 1rem;
+        background-color: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s;
+    }
+
+    .btn-logout:hover {
+        background-color: #ff5252;
+    }
+
+    .btn-settings {
+        padding: 0.5rem 1rem;
+        background-color: #4c63d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s;
+    }
+
+    .btn-settings:hover {
+        background-color: #3a4fa6;
+    }
+
+    .content {
+        flex: 1;
+        padding: 2rem;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 90%;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .modal-content.modal-danger {
+        border: 2px solid #ff6b6b;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .btn-close:hover {
+        color: #000;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid #eee;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s;
+    }
+
+    .btn-secondary {
+        background-color: #ccc;
+        color: #333;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background-color: #aaa;
+    }
+
+    .btn-danger {
+        background-color: #ff6b6b;
+        color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background-color: #ff5252;
+    }
+
+    .btn-danger:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-delete-account {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s;
+    }
+
+    .btn-delete-account:hover {
+        background-color: #ff5252;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+
+@code {
+    private AuthUser? CurrentUser;
+    private bool ShowSettingsModal = false;
+    private bool ShowConfirmModal = false;
+    private string ConfirmPassword = string.Empty;
+    private string ErrorMessage = string.Empty;
+    private bool IsDeleting = false;
+
+    protected override void OnInitialized()
+    {
+        CurrentUser = AuthService.GetCurrentUser();
+    }
+
+    private void ShowSettings()
+    {
+        ShowSettingsModal = true;
+    }
+
+    private void ConfirmDelete()
+    {
+        ShowSettingsModal = false;
+        ShowConfirmModal = true;
+        ErrorMessage = string.Empty;
+    }
+
+    private async Task DeleteAccount()
+    {
+        if (string.IsNullOrEmpty(ConfirmPassword))
+        {
+            ErrorMessage = "Veuillez entrer votre mot de passe";
+            return;
+        }
+
+        IsDeleting = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var result = await AuthService.DeleteAccountAsync(ConfirmPassword);
+            if (result)
+            {
+                AuthService.Logout();
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                ErrorMessage = "Mot de passe incorrect ou erreur lors de la suppression";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Erreur: {ex.Message}";
+        }
+        finally
+        {
+            IsDeleting = false;
+        }
+    }
+
+    private void Logout()
+    {
+        AuthService.Logout();
+        NavigationManager.NavigateTo("/login");
+    }
+}
+
+

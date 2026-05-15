@@ -17,20 +17,29 @@ builder.Services.AddHttpClient("Api", client =>
 // HttpClient for local static files (locale JSON)
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-// Register services
+// Register authentication and API services
+builder.Services.AddScoped<AuthService>(sp =>
+{
+    var factory = sp.GetRequiredService<IHttpClientFactory>();
+    return new AuthService(factory.CreateClient("Api"));
+});
+
 builder.Services.AddScoped<ApiClient>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
-    return new ApiClient(factory.CreateClient("Api"));
+    var authService = sp.GetRequiredService<AuthService>();
+    return new ApiClient(factory.CreateClient("Api"), authService);
 });
+
 builder.Services.AddScoped<LocalizationService>();
 builder.Services.AddScoped<ChatState>();
 builder.Services.AddScoped<BotService>();
 builder.Services.AddScoped<PollingService>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
+    var authService = sp.GetRequiredService<AuthService>();
     return new PollingService(
-        new ApiClient(factory.CreateClient("Api")),
+        new ApiClient(factory.CreateClient("Api"), authService),
         sp.GetRequiredService<ChatState>());
 });
 

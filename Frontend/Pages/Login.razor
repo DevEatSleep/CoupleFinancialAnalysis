@@ -1,0 +1,277 @@
+@page "/login"
+@page "/register"
+@using Frontend.Models
+@using Frontend.Services
+@inject AuthService AuthService
+@inject ChatState ChatState
+@inject NavigationManager NavigationManager
+
+<div class="login-container">
+    <div class="login-box">
+        @if (IsRegistering)
+        {
+            <h2>Créer un Couple</h2>
+            <form @onsubmit="HandleRegister">
+                <div class="form-group">
+                    <label for="email1">Email</label>
+                    <input id="email1" type="email" class="form-control" @bind="registerModel.Email" />
+                </div>
+
+                <div class="form-group">
+                    <label for="name1">Prénom (Femme)</label>
+                    <input id="name1" type="text" class="form-control" @bind="registerModel.Name1" />
+                </div>
+
+                <div class="form-group">
+                    <label for="name2">Prénom (Homme)</label>
+                    <input id="name2" type="text" class="form-control" @bind="registerModel.Name2" />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input id="password" type="password" class="form-control" @bind="registerModel.Password" />
+                </div>
+
+                <button type="submit" class="btn btn-primary" disabled="@IsLoading">
+                    @if (IsLoading)
+                    {
+                        <span>Création en cours...</span>
+                    }
+                    else
+                    {
+                        <span>S'enregistrer</span>
+                    }
+                </button>
+
+                <button type="button" class="btn btn-link" @onclick="ToggleMode" disabled="@IsLoading">
+                    Vous avez déjà un compte? Se connecter
+                </button>
+            </form>
+        }
+        else
+        {
+            <h2>Se Connecter</h2>
+            <form @onsubmit="HandleLogin">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" class="form-control" @bind="loginModel.Email" />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input id="password" type="password" class="form-control" @bind="loginModel.Password" />
+                </div>
+
+                <button type="submit" class="btn btn-primary" disabled="@IsLoading">
+                    @if (IsLoading)
+                    {
+                        <span>Connexion en cours...</span>
+                    }
+                    else
+                    {
+                        <span>Se connecter</span>
+                    }
+                </button>
+
+                <button type="button" class="btn btn-link" @onclick="ToggleMode" disabled="@IsLoading">
+                    Pas encore inscrit? S'enregistrer
+                </button>
+            </form>
+        }
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger mt-3">
+                @ErrorMessage
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .btn-primary {
+        background-color: #667eea;
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background-color: #5568d3;
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-link {
+        background-color: transparent;
+        color: #667eea;
+        text-decoration: underline;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-link:hover:not(:disabled) {
+        color: #5568d3;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .mt-3 {
+        margin-top: 1rem;
+    }
+</style>
+
+@code {
+    private LoginRequest loginModel = new();
+    private RegisterRequest registerModel = new();
+    private bool IsRegistering = false;
+    private bool IsLoading = false;
+    private string ErrorMessage = "";
+
+    private async Task HandleLogin()
+    {
+        IsLoading = true;
+        ErrorMessage = "";
+
+        try
+        {
+            var result = await AuthService.LoginAsync(loginModel);
+            if (result != null)
+            {
+                AuthService.SaveToken(result);
+                // Save woman and man names to ChatState
+                ChatState.SaveFirstName("woman", result.WomanName);
+                ChatState.SaveFirstName("man", result.ManName);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                ErrorMessage = "Email ou mot de passe incorrect";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Erreur de connexion: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task HandleRegister()
+    {
+        IsLoading = true;
+        ErrorMessage = "";
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(registerModel.Email) || string.IsNullOrWhiteSpace(registerModel.Password))
+            {
+                ErrorMessage = "Email et mot de passe sont requis";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(registerModel.Name1) || string.IsNullOrWhiteSpace(registerModel.Name2))
+            {
+                ErrorMessage = "Les prénoms des deux personnes sont requis";
+                return;
+            }
+
+            var result = await AuthService.RegisterAsync(registerModel);
+            if (result != null)
+            {
+                AuthService.SaveToken(result);
+                // Save woman and man names to ChatState
+                ChatState.SaveFirstName("woman", result.WomanName);
+                ChatState.SaveFirstName("man", result.ManName);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                ErrorMessage = "Erreur lors de l'enregistrement";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Erreur d'enregistrement: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ToggleMode()
+    {
+        IsRegistering = !IsRegistering;
+        ErrorMessage = "";
+        loginModel = new();
+        registerModel = new();
+    }
+}

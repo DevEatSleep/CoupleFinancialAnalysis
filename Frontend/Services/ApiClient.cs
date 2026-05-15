@@ -8,21 +8,34 @@ namespace Frontend.Services;
 public class ApiClient
 {
     private readonly HttpClient _http;
+    private readonly AuthService _authService;
 
-    public ApiClient(HttpClient http)
+    public ApiClient(HttpClient http, AuthService authService)
     {
         _http = http;
+        _authService = authService;
+    }
+
+    private void AddAuthorizationHeader()
+    {
+        var token = _authService.GetToken();
+        if (!string.IsNullOrEmpty(token))
+        {
+            _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        }
     }
 
     // Chat
     public async Task<List<Message>> GetMessagesAsync()
     {
+        AddAuthorizationHeader();
         return await _http.GetFromJsonAsync<List<Message>>(SharedConstants.ApiEndpoints.ChatMessages) ?? [];
     }
 
     // Bot questions
     public async Task<BotQuestion?> GetNextQuestionAsync(string? person = null)
     {
+        AddAuthorizationHeader();
         var url = person is not null
             ? $"{SharedConstants.ApiEndpoints.BotNextQuestion}/{person}"
             : SharedConstants.ApiEndpoints.BotNextQuestion;
@@ -36,6 +49,7 @@ public class ApiClient
 
     public async Task<bool> RespondToBotAsync(BotRequest request)
     {
+        AddAuthorizationHeader();
         var response = await _http.PostAsJsonAsync(SharedConstants.ApiEndpoints.BotRespond, request);
         return response.IsSuccessStatusCode;
     }
@@ -43,17 +57,20 @@ public class ApiClient
     // Responses (personal info)
     public async Task<List<BotResponseDto>> GetResponsesAsync()
     {
+        AddAuthorizationHeader();
         return await _http.GetFromJsonAsync<List<BotResponseDto>>(SharedConstants.ApiEndpoints.BotResponses) ?? [];
     }
 
     public async Task<bool> UpdateResponseAsync(int id, string userResponse)
     {
+        AddAuthorizationHeader();
         var response = await _http.PutAsJsonAsync($"{SharedConstants.ApiEndpoints.BotResponse}/{id}", new { userResponse });
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> DeleteResponseAsync(int id)
     {
+        AddAuthorizationHeader();
         var response = await _http.DeleteAsync($"{SharedConstants.ApiEndpoints.BotResponse}/{id}");
         return response.IsSuccessStatusCode;
     }
@@ -61,23 +78,27 @@ public class ApiClient
     // Expenses
     public async Task<List<Expense>> GetExpensesAsync()
     {
+        AddAuthorizationHeader();
         return await _http.GetFromJsonAsync<List<Expense>>(SharedConstants.ApiEndpoints.BotExpenses) ?? [];
     }
 
     public async Task<bool> SaveExpenseAsync(string label, decimal amount, string paidBy)
     {
+        AddAuthorizationHeader();
         var response = await _http.PostAsJsonAsync(SharedConstants.ApiEndpoints.BotExpense, new { label, amount, paidBy });
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> UpdateExpenseAsync(int id, Expense expense)
     {
+        AddAuthorizationHeader();
         var response = await _http.PutAsJsonAsync($"{SharedConstants.ApiEndpoints.BotExpense}/{id}", expense);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> DeleteExpenseAsync(int id)
     {
+        AddAuthorizationHeader();
         var response = await _http.DeleteAsync($"{SharedConstants.ApiEndpoints.BotExpense}/{id}");
         return response.IsSuccessStatusCode;
     }
@@ -85,6 +106,7 @@ public class ApiClient
     // Language
     public async Task SetLanguageAsync(string language)
     {
+        AddAuthorizationHeader();
         await _http.PostAsJsonAsync($"{SharedConstants.ApiEndpoints.BotLanguage}/{language}", new { });
     }
 
@@ -93,6 +115,7 @@ public class ApiClient
     {
         try
         {
+            AddAuthorizationHeader();
             var result = await _http.GetFromJsonAsync<List<DomestiqueResponse>>(SharedConstants.ApiEndpoints.DomestiqueBase) ?? [];
             System.Diagnostics.Debug.WriteLine($"GetDomestique returned {result.Count} records");
             foreach (var item in result)
@@ -138,6 +161,7 @@ public class ApiClient
     {
         try
         {
+            AddAuthorizationHeader();
             System.Diagnostics.Debug.WriteLine($"Saving domestique: person={person}, activite={activite}, heures={heuresParSemaine}");
             
             var payload = new
@@ -170,6 +194,7 @@ public class ApiClient
 
     public async Task<bool> DeleteDomestiqueAsync(int id)
     {
+        AddAuthorizationHeader();
         var response = await _http.DeleteAsync($"{SharedConstants.ApiEndpoints.DomestiqueBase}/{id}");
         return response.IsSuccessStatusCode;
     }

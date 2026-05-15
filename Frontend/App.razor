@@ -1,6 +1,36 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+﻿@using Frontend.Services
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        @if (AuthService.IsAuthenticated() || routeData.PageType == typeof(Pages.Login))
+        {
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        }
+        else
+        {
+            @* Redirect to login if not authenticated *@
+        }
     </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView>
+            @if (AuthService.IsAuthenticated())
+            {
+                <Pages.NotFound />
+            }
+        </LayoutView>
+    </NotFound>
 </Router>
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (!AuthService.IsAuthenticated() && NavigationManager.Uri != NavigationManager.BaseUri + "login")
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+}

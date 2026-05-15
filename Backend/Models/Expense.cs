@@ -7,4 +7,8 @@ public class Expense
     public decimal Amount { get; set; }
     public string PaidBy { get; set; } = string.Empty; // "woman", "man", or "shared"
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int CoupleId { get; set; }
+    
+    // Navigation property
+    public Couple? Couple { get; set; }
 }

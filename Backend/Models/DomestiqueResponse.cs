@@ -10,4 +10,8 @@ public class DomestiqueResponse
     public decimal InseeRefHomme { get; set; }    // INSEE reference hours/week for men
     public decimal ValeurMonetaire { get; set; } // monetary value (hours × SMIC hourly rate)
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int CoupleId { get; set; }
+    
+    // Navigation property
+    public Couple? Couple { get; set; }
 }

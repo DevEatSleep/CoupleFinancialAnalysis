@@ -45,7 +45,9 @@ public static class Constants
                 "http://localhost:5000",
                 "http://127.0.0.1:5000",
                 "http://localhost:3000",
-                "http://127.0.0.1:3000"
+                "http://127.0.0.1:3000",
+                "http://localhost:5091",
+                "http://127.0.0.1:5091"
             };
         
         private static bool IsProduction =>
@@ -198,6 +200,11 @@ public static class Constants
     /// </summary>
     public static class ApiEndpoints
     {
+        // Auth endpoints
+        public const string AuthRegister = "api/auth/register";
+        public const string AuthLogin = "api/auth/login";
+        public const string AuthVerify = "api/auth/verify";
+
         // Bot endpoints
         public const string BotNextQuestion = "api/bot/next-question";
         public const string BotRespond = "api/bot/respond";

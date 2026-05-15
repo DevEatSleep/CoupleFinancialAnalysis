@@ -10,4 +10,8 @@ public class Response
     public string ExtractedTag { get; set; } = string.Empty;
     public string Person { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int CoupleId { get; set; }
+    
+    // Navigation property
+    public Couple? Couple { get; set; }
 }

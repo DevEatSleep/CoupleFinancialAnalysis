@@ -1,6 +1,7 @@
 using CoupleChat.Data;
 using CoupleChat.Models;
 using CoupleChat.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 using SharedConstants = Shared.Constants;
@@ -9,6 +10,7 @@ namespace CoupleChat.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BotController : ControllerBase
 {
     private readonly BotService _botService;
@@ -18,6 +20,15 @@ public class BotController : ControllerBase
     {
         _botService = botService;       
         _context = context;
+    }
+
+    private int GetCoupleId()
+    {
+        var coupleIdObj = HttpContext.Items["CoupleId"];
+        if (coupleIdObj is int coupleId)
+            return coupleId;
+
+        throw new UnauthorizedAccessException("CoupleId not found in token");
     }
 
     [HttpGet("next-question")]
@@ -45,6 +56,7 @@ public class BotController : ControllerBase
     {
         try
         {
+            var coupleId = GetCoupleId();
             Console.WriteLine($"[BotController] Received request: QuestionId={request?.QuestionId}, Response={request?.UserResponse}");
 
             if (request == null || request.QuestionId == 0 || string.IsNullOrEmpty(request.UserResponse))
@@ -67,7 +79,8 @@ public class BotController : ControllerBase
                 Category = question.Category,
                 ExtractedTag = extractedTag,
                 Person = question.Person,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                CoupleId = coupleId
             };
 
             _context.Responses.Add(response);
@@ -91,7 +104,11 @@ public class BotController : ControllerBase
     [HttpGet("responses")]
     public ActionResult<IEnumerable<Response>> GetResponses()
     {
-        return Ok(_context.Responses.OrderByDescending(r => r.CreatedAt).ToList());
+        var coupleId = GetCoupleId();
+        return Ok(_context.Responses
+            .Where(r => r.CoupleId == coupleId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToList());
     }
 
     [HttpPost("expense")]
@@ -99,10 +116,13 @@ public class BotController : ControllerBase
     {
         try
         {
+            var coupleId = GetCoupleId();
+            
             if (string.IsNullOrEmpty(expense.Label) || expense.Amount <= 0 || string.IsNullOrEmpty(expense.PaidBy))
                 return BadRequest("Label, Amount, and PaidBy are required");
 
             expense.CreatedAt = DateTime.UtcNow;
+            expense.CoupleId = coupleId;
             _context.Expenses.Add(expense);
             await _context.SaveChangesAsync();
 
@@ -118,7 +138,11 @@ public class BotController : ControllerBase
     [HttpGet("expenses")]
     public ActionResult<IEnumerable<Expense>> GetExpenses()
     {
-        return Ok(_context.Expenses.OrderByDescending(e => e.CreatedAt).ToList());
+        var coupleId = GetCoupleId();
+        return Ok(_context.Expenses
+            .Where(e => e.CoupleId == coupleId)
+            .OrderByDescending(e => e.CreatedAt)
+            .ToList());
     }
 
     [HttpPut("expense/{id}")]
@@ -126,8 +150,9 @@ public class BotController : ControllerBase
     {
         try
         {
+            var coupleId = GetCoupleId();
             var existingExpense = await _context.Expenses.FindAsync(id);
-            if (existingExpense == null)
+            if (existingExpense == null || existingExpense.CoupleId != coupleId)
                 return NotFound();
 
             existingExpense.Label = expense.Label;
@@ -150,8 +175,9 @@ public class BotController : ControllerBase
     {
         try
         {
+            var coupleId = GetCoupleId();
             var expense = await _context.Expenses.FindAsync(id);
-            if (expense == null)
+            if (expense == null || expense.CoupleId != coupleId)
                 return NotFound();
 
             _context.Expenses.Remove(expense);
@@ -170,8 +196,9 @@ public class BotController : ControllerBase
     {
         try
         {
+            var coupleId = GetCoupleId();
             var existingResponse = await _context.Responses.FindAsync(id);
-            if (existingResponse == null)
+            if (existingResponse == null || existingResponse.CoupleId != coupleId)
                 return NotFound();
 
             existingResponse.UserResponse = response.UserResponse;
@@ -192,8 +219,9 @@ public class BotController : ControllerBase
     {
         try
         {
+            var coupleId = GetCoupleId();
             var response = await _context.Responses.FindAsync(id);
-            if (response == null)
+            if (response == null || response.CoupleId != coupleId)
                 return NotFound();
 
             _context.Responses.Remove(response);

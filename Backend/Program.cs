@@ -1,8 +1,12 @@
 using CoupleChat.Data;
 using CoupleChat.Models;
 using CoupleChat.Services;
+using CoupleChat.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Shared;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +15,32 @@ var builder = WebApplication.CreateBuilder(args);
 // Local development uses 5000
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+// JWT Configuration
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecretKey!)),
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 // Add services
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -32,6 +62,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseSqlite($"Data Source={Constants.Paths.DatabaseFile}"));
 
+// Authentication services
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<PasswordService>();
+
 // Domestic work services
 builder.Services.AddScoped<DomestiqueReferenceService>();
 
@@ -48,8 +82,13 @@ var app = builder.Build();
 // Serve Blazor WebAssembly framework files (must be before routing/static files)
 app.UseBlazorFrameworkFiles();
 
-app.UseRouting();
 app.UseCors(Constants.Network.CorsPolicyName);
+app.UseRouting();
+
+// Add authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseCoupleIdMiddleware();
 
 // Serve static files from wwwroot (Frontend)
 app.UseStaticFiles();
