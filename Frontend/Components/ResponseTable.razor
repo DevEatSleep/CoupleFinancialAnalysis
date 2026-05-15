@@ -48,7 +48,7 @@
                         }
                     </td>
                     <td>
-                        <button class="delete-btn" @onclick="() => DeleteResponse(State.WomanData.NameId)">🗑️</button>
+                        <button class="delete-btn" @onclick="() => DeletePersonData(State.WomanData)">🗑️</button>
                     </td>
                 </tr>
             }
@@ -78,7 +78,7 @@
                         }
                     </td>
                     <td>
-                        <button class="delete-btn" @onclick="() => DeleteResponse(State.ManData.NameId)">🗑️</button>
+                        <button class="delete-btn" @onclick="() => DeletePersonData(State.ManData)">🗑️</button>
                     </td>
                 </tr>
             }
@@ -125,6 +125,16 @@
     {
         if (e.Key == "Enter") await SaveEdit();
         if (e.Key == "Escape") _editingId = null;
+    }
+
+    private async Task DeletePersonData(PersonData person)
+    {
+        var ids = new[] { person.NameId, person.AgeId, person.SalaryId };
+        foreach (var id in ids)
+        {
+            if (id is not null)
+                await Api.DeleteResponseAsync(id.Value);
+        }
     }
 
     private async Task DeleteResponse(int? id)
