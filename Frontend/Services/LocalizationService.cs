@@ -1,11 +1,14 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.JSInterop;
+using Shared;
 
 namespace Frontend.Services;
 
 public class LocalizationService
 {
     private readonly HttpClient _http;
+    private readonly IJSRuntime _js;
     private Dictionary<string, Dictionary<string, JsonElement>> _translations = new();
     private string _currentLanguage = "en";
 
@@ -13,24 +16,36 @@ public class LocalizationService
 
     public string CurrentLanguage => _currentLanguage;
 
-    public LocalizationService(HttpClient http)
+    public LocalizationService(HttpClient http, IJSRuntime js)
     {
         _http = http;
+        _js = js;
     }
 
     public async Task InitializeAsync()
     {
-        var languages = new[] { "en", "fr", "es" };
-
-        foreach (var lang in languages)
+        foreach (var lang in Constants.Languages.Supported)
         {
             var json = await _http.GetFromJsonAsync<Dictionary<string, JsonElement>>($"locales/{lang}.json");
             if (json is not null)
                 _translations[lang] = json;
         }
 
-        // Detect browser language would require JSInterop; default to "en"
-        _currentLanguage = "en";
+        _currentLanguage = await DetectBrowserLanguageAsync();
+    }
+
+    private async Task<string> DetectBrowserLanguageAsync()
+    {
+        try
+        {
+            var browserLang = await _js.InvokeAsync<string>("eval", "navigator.language || 'en'");
+            var langCode = browserLang.Split('-')[0].ToLowerInvariant();
+            return Constants.Languages.Supported.Contains(langCode) ? langCode : "en";
+        }
+        catch
+        {
+            return "en";
+        }
     }
 
     public void SetLanguage(string language)
