@@ -7,7 +7,6 @@ public class Response
     public string QuestionText { get; set; } = string.Empty;
     public string UserResponse { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
-    public string ExtractedTag { get; set; } = string.Empty;
     public string Person { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int CoupleId { get; set; }

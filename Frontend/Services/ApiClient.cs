@@ -32,13 +32,13 @@ public class ApiClient
         return await _http.GetFromJsonAsync<List<Message>>(SharedConstants.ApiEndpoints.ChatMessages) ?? [];
     }
 
-    // Bot questions
+    // Survey questions
     public async Task<BotQuestion?> GetNextQuestionAsync(string? person = null)
     {
         AddAuthorizationHeader();
         var url = person is not null
-            ? $"{SharedConstants.ApiEndpoints.BotNextQuestion}/{person}"
-            : SharedConstants.ApiEndpoints.BotNextQuestion;
+            ? $"{SharedConstants.ApiEndpoints.SurveyNextQuestion}/{person}"
+            : SharedConstants.ApiEndpoints.SurveyNextQuestion;
 
         var response = await _http.GetAsync(url);
         if (!response.IsSuccessStatusCode)
@@ -57,7 +57,7 @@ public class ApiClient
     public async Task<bool> RespondToBotAsync(BotRequest request)
     {
         AddAuthorizationHeader();
-        var response = await _http.PostAsJsonAsync(SharedConstants.ApiEndpoints.BotRespond, request);
+        var response = await _http.PostAsJsonAsync(SharedConstants.ApiEndpoints.SurveyResponses, request);
         return response.IsSuccessStatusCode;
     }
 
@@ -65,20 +65,20 @@ public class ApiClient
     public async Task<List<BotResponseDto>> GetResponsesAsync()
     {
         AddAuthorizationHeader();
-        return await _http.GetFromJsonAsync<List<BotResponseDto>>(SharedConstants.ApiEndpoints.BotResponses) ?? [];
+        return await _http.GetFromJsonAsync<List<BotResponseDto>>(SharedConstants.ApiEndpoints.SurveyResponses) ?? [];
     }
 
     public async Task<bool> UpdateResponseAsync(int id, string userResponse)
     {
         AddAuthorizationHeader();
-        var response = await _http.PutAsJsonAsync($"{SharedConstants.ApiEndpoints.BotResponse}/{id}", new { userResponse });
+        var response = await _http.PutAsJsonAsync($"{SharedConstants.ApiEndpoints.SurveyResponses}/{id}", new { userResponse });
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> DeleteResponseAsync(int id)
     {
         AddAuthorizationHeader();
-        var response = await _http.DeleteAsync($"{SharedConstants.ApiEndpoints.BotResponse}/{id}");
+        var response = await _http.DeleteAsync($"{SharedConstants.ApiEndpoints.SurveyResponses}/{id}");
         return response.IsSuccessStatusCode;
     }
 
@@ -86,27 +86,27 @@ public class ApiClient
     public async Task<List<Expense>> GetExpensesAsync()
     {
         AddAuthorizationHeader();
-        return await _http.GetFromJsonAsync<List<Expense>>(SharedConstants.ApiEndpoints.BotExpenses) ?? [];
+        return await _http.GetFromJsonAsync<List<Expense>>(SharedConstants.ApiEndpoints.Expenses) ?? [];
     }
 
     public async Task<bool> SaveExpenseAsync(string label, decimal amount, string paidBy)
     {
         AddAuthorizationHeader();
-        var response = await _http.PostAsJsonAsync(SharedConstants.ApiEndpoints.BotExpense, new { label, amount, paidBy });
+        var response = await _http.PostAsJsonAsync(SharedConstants.ApiEndpoints.Expenses, new { label, amount, paidBy });
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> UpdateExpenseAsync(int id, Expense expense)
     {
         AddAuthorizationHeader();
-        var response = await _http.PutAsJsonAsync($"{SharedConstants.ApiEndpoints.BotExpense}/{id}", expense);
+        var response = await _http.PutAsJsonAsync($"{SharedConstants.ApiEndpoints.Expenses}/{id}", expense);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> DeleteExpenseAsync(int id)
     {
         AddAuthorizationHeader();
-        var response = await _http.DeleteAsync($"{SharedConstants.ApiEndpoints.BotExpense}/{id}");
+        var response = await _http.DeleteAsync($"{SharedConstants.ApiEndpoints.Expenses}/{id}");
         return response.IsSuccessStatusCode;
     }
 
@@ -114,7 +114,7 @@ public class ApiClient
     public async Task SetLanguageAsync(string language)
     {
         AddAuthorizationHeader();
-        await _http.PostAsJsonAsync($"{SharedConstants.ApiEndpoints.BotLanguage}/{language}", new { });
+        await _http.PostAsJsonAsync($"{SharedConstants.ApiEndpoints.SurveyLanguage}/{language}", new { });
     }
 
     // Travail Domestique

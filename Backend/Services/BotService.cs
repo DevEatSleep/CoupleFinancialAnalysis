@@ -17,8 +17,6 @@ public class BotService
 {
     private List<Question> _questions = new();
     private int _currentQuestionIndex = 0;
-    private readonly Dictionary<int, int> _womanIndices = new();
-    private readonly Dictionary<int, int> _manIndices = new();
     private readonly Dictionary<int, int> _sharedIndices = new();
     private readonly string _questionsBasePath;
     private string _currentLanguage = SharedConstants.Languages.English;
@@ -55,8 +53,6 @@ public class BotService
     private void ResetIndices()
     {
         _currentQuestionIndex = 0;
-        _womanIndices.Clear();
-        _manIndices.Clear();
         _sharedIndices.Clear();
     }
 
@@ -112,7 +108,7 @@ public class BotService
         return question;
     }
 
-    public Question? GetNextQuestionForPerson(string person, int coupleId)
+    public Question? GetNextQuestionForPerson(string person, HashSet<int> answeredQuestionIds)
     {
         // Exclude travail_domestique questions — those are handled entirely by the frontend domestique flow
         var personQuestions = _questions
@@ -123,31 +119,19 @@ public class BotService
         if (personQuestions.Count == 0)
             return null;
 
-        // Shared questions (expenses) are a repeating flow: allow cycling so users can add
-        // multiple expenses by replying "yes". Personal questions remain single-run.
+        // Shared questions (expenses) cycle so users can add multiple expenses
         if (person == SharedConstants.PersonTypes.Shared)
         {
-            var idx = _sharedIndices.GetValueOrDefault(coupleId, 0) % personQuestions.Count;
+            // Use a session index so the cycle advances within a session; acceptable to reset on restart
+            var coupleKey = answeredQuestionIds.GetHashCode();
+            var idx = _sharedIndices.GetValueOrDefault(coupleKey, 0) % personQuestions.Count;
             var selectedQuestion = personQuestions[idx];
-            _sharedIndices[coupleId] = (idx + 1) % personQuestions.Count;
+            _sharedIndices[coupleKey] = (idx + 1) % personQuestions.Count;
             return selectedQuestion;
         }
 
-        Dictionary<int, int> indices;
-        if (person == SharedConstants.PersonTypes.Woman)
-            indices = _womanIndices;
-        else if (person == SharedConstants.PersonTypes.Man)
-            indices = _manIndices;
-        else
-            return null;
-
-        var index = indices.GetValueOrDefault(coupleId, 0);
-        if (index >= personQuestions.Count)
-            return null; // All questions for this person have been asked
-
-        var question = personQuestions[index];
-        indices[coupleId] = index + 1;
-        return question;
+        // For woman/man: return the first unanswered question (DB-derived, restart-safe)
+        return personQuestions.FirstOrDefault(q => !answeredQuestionIds.Contains(q.Id));
     }
 
     public Question? GetQuestionById(int id)

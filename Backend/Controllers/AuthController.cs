@@ -1,6 +1,7 @@
 using CoupleChat.Data;
 using CoupleChat.Models;
 using CoupleChat.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoupleChat.Controllers;
@@ -127,19 +128,12 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Verify if a token is still valid
     /// </summary>
+    [Authorize]
     [HttpPost("verify")]
-    public ActionResult<AuthResponse> VerifyToken([FromBody] VerifyTokenRequest request)
+    public ActionResult<AuthResponse> VerifyToken()
     {
-        if (string.IsNullOrWhiteSpace(request.Token))
-            return BadRequest("Token is required");
-
-        var principal = _jwtService.ValidateToken(request.Token);
-        if (principal == null)
-            return Unauthorized("Invalid or expired token");
-
-        var userIdClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        var coupleIdClaim = principal.FindFirst("coupleId")?.Value;
-        var emailClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        var userIdClaim = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var coupleIdClaim = HttpContext.User.FindFirst("coupleId")?.Value;
 
         if (!int.TryParse(userIdClaim, out var userId) || !int.TryParse(coupleIdClaim, out var coupleId))
             return Unauthorized("Invalid token claims");
@@ -148,14 +142,14 @@ public class AuthController : ControllerBase
         if (user == null)
             return Unauthorized("User not found");
 
-        // Get the couple's users to retrieve both names
         var coupleUsers = _context.Users.Where(u => u.CoupleId == coupleId).OrderBy(u => u.Id).ToList();
         var womanName = coupleUsers.Count > 0 ? coupleUsers[0].Name : user.Name;
         var manName = coupleUsers.Count > 1 ? coupleUsers[1].Name : user.Name;
 
+        var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
         return Ok(new AuthResponse
         {
-            Token = request.Token,
+            Token = token,
             UserId = user.Id,
             CoupleId = user.CoupleId,
             Email = user.Email,
@@ -168,17 +162,14 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Change password for the currently authenticated user
     /// </summary>
+    [Authorize]
     [HttpPost("change-password")]
     public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
-            return BadRequest("Token, current password, and new password are required");
+        if (string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
+            return BadRequest("Current password and new password are required");
 
-        var principal = _jwtService.ValidateToken(request.Token);
-        if (principal == null)
-            return Unauthorized("Invalid or expired token");
-
-        var userIdClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (!int.TryParse(userIdClaim, out var userId))
             return Unauthorized("Invalid token claims");
 
@@ -198,18 +189,15 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Delete the entire couple account and all associated data
     /// </summary>
+    [Authorize]
     [HttpDelete("delete-account")]
     public async Task<ActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.Password))
-            return BadRequest("Token and password are required");
+        if (string.IsNullOrWhiteSpace(request.Password))
+            return BadRequest("Password is required");
 
-        var principal = _jwtService.ValidateToken(request.Token);
-        if (principal == null)
-            return Unauthorized("Invalid or expired token");
-
-        var userIdClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        var coupleIdClaim = principal.FindFirst("coupleId")?.Value;
+        var userIdClaim = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var coupleIdClaim = HttpContext.User.FindFirst("coupleId")?.Value;
 
         if (!int.TryParse(userIdClaim, out var userId) || !int.TryParse(coupleIdClaim, out var coupleId))
             return Unauthorized("Invalid token claims");
@@ -258,14 +246,12 @@ public class AuthController : ControllerBase
 
 public class ChangePasswordRequest
 {
-    public string Token { get; set; } = string.Empty;
     public string CurrentPassword { get; set; } = string.Empty;
     public string NewPassword { get; set; } = string.Empty;
 }
 
 public class DeleteAccountRequest
 {
-    public string Token { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
 
@@ -284,10 +270,6 @@ public class LoginRequest
     public string Password { get; set; } = string.Empty;
 }
 
-public class VerifyTokenRequest
-{
-    public string Token { get; set; } = string.Empty;
-}
 
 public class AuthResponse
 {

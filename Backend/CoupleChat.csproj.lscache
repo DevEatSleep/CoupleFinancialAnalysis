@@ -57,10 +57,11 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 [sourceFiles]
 Controllers/
  AuthController.cs
- BotController.cs
  ChatController.cs
  DomestiqueController.cs
+ ExpenseController.cs
  ReferenceController.cs
+ SurveyController.cs
 Data/ChatDbContext.cs
 Middleware/CoupleIdMiddleware.cs
 Models/

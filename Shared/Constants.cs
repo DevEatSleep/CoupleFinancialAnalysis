@@ -210,14 +210,13 @@ public static class Constants
         public const string AuthChangePassword = "api/auth/change-password";
         public const string AuthDeleteAccount = "api/auth/delete-account";
 
-        // Bot endpoints
-        public const string BotNextQuestion = "api/bot/next-question";
-        public const string BotRespond = "api/bot/respond";
-        public const string BotResponses = "api/bot/responses";
-        public const string BotResponse = "api/bot/response";
-        public const string BotExpenses = "api/bot/expenses";
-        public const string BotExpense = "api/bot/expense";
-        public const string BotLanguage = "api/bot/language";
+        // Survey endpoints
+        public const string SurveyNextQuestion = "api/survey/next-question";
+        public const string SurveyResponses    = "api/survey/responses";
+        public const string SurveyLanguage     = "api/survey/language";
+
+        // Expense endpoints
+        public const string Expenses = "api/expenses";
 
         // Domestique endpoints
         public const string DomestiqueBase = "api/domestique";

@@ -53,8 +53,8 @@ public class AuthService
     {
         try
         {
-            var request = new { token };
-            var response = await _http.PostAsJsonAsync(Constants.ApiEndpoints.AuthVerify, request);
+            _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await _http.PostAsJsonAsync(Constants.ApiEndpoints.AuthVerify, new { });
             if (response.IsSuccessStatusCode)
                 return await response.Content.ReadFromJsonAsync<AuthResponse>();
             return null;
@@ -103,10 +103,10 @@ public class AuthService
             if (string.IsNullOrEmpty(_currentToken))
                 return false;
 
-            var request = new { token = _currentToken, password };
+            _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _currentToken);
             var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, Constants.ApiEndpoints.AuthDeleteAccount)
             {
-                Content = JsonContent.Create(request)
+                Content = JsonContent.Create(new DeleteAccountRequest { Password = password })
             };
 
             var deleteResponse = await _http.SendAsync(deleteRequest);
@@ -126,9 +126,9 @@ public class AuthService
             if (string.IsNullOrEmpty(_currentToken))
                 return (false, "Non connecté");
 
+            _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _currentToken);
             var request = new ChangePasswordRequest
             {
-                Token = _currentToken,
                 CurrentPassword = currentPassword,
                 NewPassword = newPassword
             };
