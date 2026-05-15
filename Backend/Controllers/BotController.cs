@@ -44,7 +44,8 @@ public class BotController : ControllerBase
     [HttpGet("next-question/{person}")]
     public ActionResult<dynamic> GetNextQuestionForPerson(string person)
     {
-        var question = _botService.GetNextQuestionForPerson(person);
+        var coupleId = GetCoupleId();
+        var question = _botService.GetNextQuestionForPerson(person, coupleId);
         if (question == null)
             return BadRequest($"No more questions available for {person}");
 

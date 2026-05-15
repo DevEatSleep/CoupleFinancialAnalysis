@@ -237,11 +237,12 @@
 
     private async Task AskWomanQuestions() => await Bot.AskQuestionsAsync("woman");
     private async Task AskManQuestions() => await Bot.AskQuestionsAsync("man");
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         State.OnChange += OnStateChanged;
         Loc.OnLanguageChanged += OnLanguageChanged;
         Polling.Start();
+        await Api.SetLanguageAsync(Loc.CurrentLanguage);
     }
 
     private void OnStateChanged()
@@ -264,8 +265,11 @@
 
     private void OnLanguageChanged()
     {
-        _ = Api.SetLanguageAsync(Loc.CurrentLanguage);
-        InvokeAsync(StateHasChanged);
+        InvokeAsync(async () =>
+        {
+            await Api.SetLanguageAsync(Loc.CurrentLanguage);
+            StateHasChanged();
+        });
     }
 
     private async Task SendMessage()
