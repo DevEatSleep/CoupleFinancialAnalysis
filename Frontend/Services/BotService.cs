@@ -291,10 +291,19 @@ public class BotService
                         _state.CurrentExpense.Amount > 0 &&
                         !string.IsNullOrEmpty(_state.CurrentExpense.PaidBy))
                     {
-                        await _api.SaveExpenseAsync(
+                        var saved = await _api.SaveExpenseAsync(
                             _state.CurrentExpense.Label,
                             _state.CurrentExpense.Amount,
                             _state.CurrentExpense.PaidBy);
+
+                        if (!saved)
+                        {
+                            _state.AddChatMessage(_state.CurrentUser, response);
+                            _state.AddChatMessage(Sender, _loc.T("bot.error"));
+                            _state.IsBotWaiting = false;
+                            _state.CurrentBotQuestion = null;
+                            return;
+                        }
 
                         var msg = _loc.T("bot.expenseRecorded")
                             .Replace("{label}", _state.CurrentExpense.Label)
@@ -376,6 +385,15 @@ public class BotService
         });
 
         _state.AddChatMessage(_state.CurrentUser, response);
+
+        if (!success)
+        {
+            _state.AddChatMessage(Sender, _loc.T("bot.error"));
+            _state.IsBotWaiting = false;
+            _state.CurrentBotQuestion = null;
+            return;
+        }
+
         _state.IsBotWaiting = false;
         _state.CurrentBotQuestion = null;
 
