@@ -59,8 +59,20 @@ builder.Services.AddCors(options =>
 });
 
 // Database
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+string dbConnectionString;
+if (!string.IsNullOrEmpty(databaseUrl))
+{
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    dbConnectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+}
+else
+{
+    dbConnectionString = "Host=localhost;Database=couplefinancial;Username=postgres;Password=postgres";
+}
 builder.Services.AddDbContext<ChatDbContext>(options =>
-    options.UseSqlite($"Data Source={Constants.Paths.DatabaseFile}"));
+    options.UseNpgsql(dbConnectionString));
 
 // Authentication services
 builder.Services.AddScoped<JwtService>();
