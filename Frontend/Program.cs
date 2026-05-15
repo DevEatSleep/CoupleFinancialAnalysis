@@ -11,12 +11,15 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // HttpClient for API calls → backend
+// In development, backend runs on port 5000 while frontend runs on 5091.
+// In production (Railway/etc.), the backend serves the frontend from the same origin,
+// so we use HostEnvironment.BaseAddress directly.
+// NOTE: Environment.GetEnvironmentVariable does not work in Blazor WASM (browser context),
+// so we use builder.HostEnvironment.IsDevelopment() instead.
 builder.Services.AddHttpClient("Api", client =>
 {
-    var serverUrl = Constants.Network.ServerUrl;
-    // Use explicit backend URL when available (avoids routing to the frontend dev server)
-    client.BaseAddress = Uri.IsWellFormedUriString(serverUrl, UriKind.Absolute)
-        ? new Uri(serverUrl.TrimEnd('/') + "/")
+    client.BaseAddress = builder.HostEnvironment.IsDevelopment()
+        ? new Uri("http://localhost:5000/")
         : new Uri(builder.HostEnvironment.BaseAddress);
 });
 
