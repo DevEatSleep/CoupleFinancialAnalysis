@@ -90,8 +90,8 @@
     private int? _editingId;
     private string EditValue { get; set; } = "";
 
-    private string DisplayWomanName => State.FirstNames.TryGetValue("woman", out var n) ? n : State.WomanData.Name;
-    private string DisplayManName => State.FirstNames.TryGetValue("man", out var n) ? n : State.ManData.Name;
+    private string DisplayWomanName => State.WomanData.Name != "-" ? State.WomanData.Name : State.FirstNames.TryGetValue("woman", out var n) ? n : "Woman";
+    private string DisplayManName => State.ManData.Name != "-" ? State.ManData.Name : State.FirstNames.TryGetValue("man", out var n) ? n : "Man";
 
     private bool HasWomanData => State.WomanData.Name != "-" || State.WomanData.Age != "-" || State.WomanData.Salary != "-";
     private bool HasManData => State.ManData.Name != "-" || State.ManData.Age != "-" || State.ManData.Salary != "-";

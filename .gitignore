@@ -1,23 +1,51 @@
-## Backend
-Backend/bin/
-Backend/obj/
-Backend/*.db
-Backend/*.db-shm
-Backend/*.db-wal
+# ─── .NET build output ───────────────────────────────────────────────────────
+**/bin/
+**/obj/
 
-## Node
-node_modules/
-package-lock.json
-yarn.lock
+# ─── SQLite database (runtime data) ─────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
 
-## IDE
+# ─── .NET user secrets & local config overrides ──────────────────────────────
+appsettings.local.json
+appsettings.Development.json
+secrets.json
+
+# ─── NuGet ───────────────────────────────────────────────────────────────────
+*.nupkg
+.nuget/
+
+# ─── Publish output ──────────────────────────────────────────────────────────
+**/publish/
+
+# ─── IDE — Visual Studio ─────────────────────────────────────────────────────
+.vs/
+*.user
+*.suo
+*.rsuser
+*.cache
+*.lscache
+
+# ─── IDE — VS Code ───────────────────────────────────────────────────────────
 .vscode/
+
+# ─── IDE — JetBrains Rider ───────────────────────────────────────────────────
 .idea/
+*.sln.iml
+
+# ─── OS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
 *.swp
 *.swo
-*~
-.DS_Store
 
-## Environment
+# ─── Environment & secrets ───────────────────────────────────────────────────
 .env
 .env.local
+.env.*.local
+
+# ─── Node (not used but common in mixed repos) ───────────────────────────────
+node_modules/

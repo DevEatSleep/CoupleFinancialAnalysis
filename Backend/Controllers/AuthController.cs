@@ -87,7 +87,7 @@ public class AuthController : ControllerBase
             Email = user1.Email,
             Name = user1.Name,
             WomanName = user1.Name,
-            ManName = user2?.Name ?? user1.Name
+            ManName = user2?.Name ?? request.Name2
         });
     }
 
