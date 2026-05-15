@@ -280,11 +280,13 @@ public class BotService
                     _state.CurrentExpense.Label = response;
                     break;
                 case SharedConstants.QuestionIds.ExpenseAmount:
-                    if (decimal.TryParse(response, out var amount))
+                    var amountStr = response.Replace(',', '.').Trim();
+                    if (decimal.TryParse(amountStr, System.Globalization.NumberStyles.Any,
+                            System.Globalization.CultureInfo.InvariantCulture, out var amount))
                         _state.CurrentExpense.Amount = amount;
                     break;
                 case SharedConstants.QuestionIds.ExpensePaidBy:
-                    _state.CurrentExpense.PaidBy = response;
+                    _state.CurrentExpense.PaidBy = NormalizePaidBy(response);
 
                     // Save the complete expense
                     if (!string.IsNullOrEmpty(_state.CurrentExpense.Label) &&
@@ -403,4 +405,11 @@ public class BotService
             await AskNextQuestionAsync();
         }
     }
+
+    private static string NormalizePaidBy(string input) => input.ToLowerInvariant().Trim() switch
+    {
+        "femme"   or "woman" or "mujer"                  => "woman",
+        "homme"   or "man"   or "hombre"                 => "man",
+        _                                                  => "shared"
+    };
 }

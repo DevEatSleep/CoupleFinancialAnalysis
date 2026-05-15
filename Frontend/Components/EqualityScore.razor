@@ -83,9 +83,9 @@ else
     private decimal ManSalary   => decimal.TryParse(State.ManData.Salary,   out var v) ? v : 0;
     private decimal TotalSalary => WomanSalary + ManSalary;
 
-    private decimal WomanExpPaid  => State.Expenses.Where(e => e.PaidBy == "woman").Sum(e => e.Amount);
-    private decimal ManExpPaid    => State.Expenses.Where(e => e.PaidBy == "man").Sum(e => e.Amount);
-    private decimal SharedExpPaid => State.Expenses.Where(e => e.PaidBy == "shared").Sum(e => e.Amount);
+    private decimal WomanExpPaid  => State.Expenses.Where(e => e.PaidBy is "woman" or "femme"  or "mujer").Sum(e => e.Amount);
+    private decimal ManExpPaid    => State.Expenses.Where(e => e.PaidBy is "man"   or "homme"  or "hombre").Sum(e => e.Amount);
+    private decimal SharedExpPaid => State.Expenses.Where(e => e.PaidBy is "shared" or "partagé" or "partage" or "compartido").Sum(e => e.Amount);
     private decimal WomanExp      => WomanExpPaid + SharedExpPaid / 2;
     private decimal ManExp        => ManExpPaid   + SharedExpPaid / 2;
     private decimal TotalExp      => WomanExp + ManExp;
