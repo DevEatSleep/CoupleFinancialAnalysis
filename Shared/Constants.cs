@@ -34,12 +34,15 @@ public static class Constants
         public const string CorsPolicyName = "AllowFrontend";
         
         // Server URL for API calls from Frontend
-        // Uses relative path (/) for Azure, or localhost for local dev
+        // Uses relative path (/) in production (frontend served from same host), or localhost for local dev
         public static string ServerUrl => IsProduction ? "/" : "http://localhost:5000";
-        
-        // Allowed origins for CORS
+
+        // Allowed origins for CORS.
+        // In production, set ALLOWED_ORIGINS env var (comma-separated) on your host (Railway, Azure, etc.).
+        // Example: ALLOWED_ORIGINS=https://myapp.railway.app,https://myapp.com
         public static string[] AllowedOrigins => IsProduction
-            ? new[] { "https://couple-financial-app.azurewebsites.net" }
+            ? (Environment.GetEnvironmentVariable("ALLOWED_ORIGINS") ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             : new[]
             {
                 "http://localhost:5000",
@@ -49,7 +52,7 @@ public static class Constants
                 "http://localhost:5091",
                 "http://127.0.0.1:5091"
             };
-        
+
         private static bool IsProduction =>
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
     }

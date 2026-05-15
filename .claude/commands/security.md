@@ -1,0 +1,1 @@
+Perform a security audit on $ARGUMENTS. Look for vulnerabilities such as injection, XSS, insecure deserialization, missing validation, exposed secrets, and broken access control. Propose concrete fixes for each issue found.

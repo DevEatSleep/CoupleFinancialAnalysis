@@ -44,7 +44,14 @@ public class ApiClient
         if (!response.IsSuccessStatusCode)
             return null;
 
-        return await response.Content.ReadFromJsonAsync<BotQuestion>();
+        try
+        {
+            return await response.Content.ReadFromJsonAsync<BotQuestion>();
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return null;
+        }
     }
 
     public async Task<bool> RespondToBotAsync(BotRequest request)

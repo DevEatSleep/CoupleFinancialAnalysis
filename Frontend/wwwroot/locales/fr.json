@@ -86,6 +86,9 @@
     "score90": "✅ Très bonne égalité dans le couple !",
     "score70": "🟡 Légère inégalité, quelques ajustements possibles.",
     "score50": "🟠 Inégalité notable. Un dialogue s'impose.",
-    "score0": "🔴 Forte inégalité détectée. Revoyez la répartition."
+    "score0": "🔴 Forte inégalité détectée. Revoyez la répartition.",
+    "howCalculated": "ℹ️ Comment est-ce calculé ?",
+    "financialGapExplain": "Écart financier : différence entre la part des dépenses de chaque personne et sa part dans le revenu total. 0 pt = chacun paie proportionnellement à son salaire.",
+    "domesticGapExplain": "Écart domestique : écart entre le partage déclaré des heures ménagères et un partage 50/50. 0 pt = partage parfaitement égal."
   }
 }

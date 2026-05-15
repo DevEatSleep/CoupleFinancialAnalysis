@@ -122,6 +122,32 @@ public class AuthService
         }
     }
 
+    public async Task<(bool Success, string Error)> ChangePasswordAsync(string currentPassword, string newPassword)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(_currentToken))
+                return (false, "Non connecté");
+
+            var request = new ChangePasswordRequest
+            {
+                Token = _currentToken,
+                CurrentPassword = currentPassword,
+                NewPassword = newPassword
+            };
+            var response = await _http.PostAsJsonAsync($"{Constants.Network.ServerUrl}/api/auth/change-password", request);
+            if (response.IsSuccessStatusCode)
+                return (true, "");
+
+            var error = await response.Content.ReadAsStringAsync();
+            return (false, error);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
     public void Logout()
     {
         _currentToken = null;

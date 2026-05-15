@@ -6,6 +6,7 @@
 @inject ApiClient Api
 @inject LocalizationService Loc
 @inject PollingService Polling
+@inject AuthService AuthService
 @inject IJSRuntime JS
 @implements IDisposable
 
@@ -14,8 +15,40 @@
     <div class="dashboard">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h1>@Loc.T("dashboard.title")</h1>
-            <LanguageSelector />
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <LanguageSelector />
+                <button class="btn-account" @onclick="ToggleChangePassword" title="Changer le mot de passe">&#9881;</button>
+            </div>
         </div>
+
+        @if (_showChangePassword)
+        {
+            <div class="change-password-panel">
+                <h3>Changer le mot de passe</h3>
+                <div class="form-group">
+                    <label>Mot de passe actuel</label>
+                    <input type="password" class="form-control" @bind="_currentPassword" />
+                </div>
+                <div class="form-group">
+                    <label>Nouveau mot de passe</label>
+                    <input type="password" class="form-control" @bind="_newPassword" />
+                </div>
+                <div class="form-group">
+                    <label>Confirmer le nouveau mot de passe</label>
+                    <input type="password" class="form-control" @bind="_confirmPassword" />
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn-save" @onclick="HandleChangePassword" disabled="@_changePwdLoading">
+                        @(_changePwdLoading ? "Enregistrement..." : "Enregistrer")
+                    </button>
+                    <button class="btn-cancel" @onclick="ToggleChangePassword">Annuler</button>
+                </div>
+                @if (!string.IsNullOrEmpty(_changePwdMessage))
+                {
+                    <div class="@(_changePwdSuccess ? "msg-success" : "msg-error")">@_changePwdMessage</div>
+                }
+            </div>
+        }
         <div class="feed">
             <h2>@Loc.T("dashboard.personal")</h2>
             <ResponseTable />
@@ -91,9 +124,106 @@
     </div>
 </div>
 
+<style>
+    .btn-account {
+        background: none;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        line-height: 1;
+        color: #555;
+        transition: background 0.2s;
+    }
+    .btn-account:hover { background: #f0f0f0; }
+
+    .change-password-panel {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1.2rem;
+        margin-bottom: 20px;
+    }
+    .change-password-panel h3 { margin: 0 0 1rem; font-size: 1rem; color: #333; }
+    .change-password-panel .form-group { margin-bottom: 0.75rem; }
+    .change-password-panel label { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; color: #555; }
+    .change-password-panel .form-control {
+        width: 100%;
+        padding: 0.45rem 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+    }
+    .btn-save {
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 1.2rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    .btn-save:hover:not(:disabled) { background: #5568d3; }
+    .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-cancel {
+        background: #eee;
+        color: #333;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    .btn-cancel:hover { background: #ddd; }
+    .msg-success { color: #2e7d32; margin-top: 0.75rem; font-size: 0.9rem; }
+    .msg-error { color: #c62828; margin-top: 0.75rem; font-size: 0.9rem; }
+</style>
+
 @code {
     private string InputText { get; set; } = "";
     private ElementReference _chatContainer;
+
+    private bool _showChangePassword = false;
+    private string _currentPassword = "";
+    private string _newPassword = "";
+    private string _confirmPassword = "";
+    private bool _changePwdLoading = false;
+    private string _changePwdMessage = "";
+    private bool _changePwdSuccess = false;
+
+    private void ToggleChangePassword()
+    {
+        _showChangePassword = !_showChangePassword;
+        _currentPassword = _newPassword = _confirmPassword = _changePwdMessage = "";
+    }
+
+    private async Task HandleChangePassword()
+    {
+        if (string.IsNullOrWhiteSpace(_currentPassword) || string.IsNullOrWhiteSpace(_newPassword))
+        {
+            _changePwdMessage = "Tous les champs sont requis";
+            _changePwdSuccess = false;
+            return;
+        }
+        if (_newPassword != _confirmPassword)
+        {
+            _changePwdMessage = "Les mots de passe ne correspondent pas";
+            _changePwdSuccess = false;
+            return;
+        }
+
+        _changePwdLoading = true;
+        _changePwdMessage = "";
+        var (success, error) = await AuthService.ChangePasswordAsync(_currentPassword, _newPassword);
+        _changePwdLoading = false;
+        _changePwdSuccess = success;
+        _changePwdMessage = success ? "Mot de passe changé avec succès" : "Erreur : " + error.Trim('"');
+        if (success)
+            _currentPassword = _newPassword = _confirmPassword = "";
+    }
 
     private string WomanButtonLabel => Loc.T("buttons.womanQuestions")
         .Replace("Woman", State.GetFirstName("woman"))

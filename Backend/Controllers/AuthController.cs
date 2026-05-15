@@ -166,6 +166,36 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Change password for the currently authenticated user
+    /// </summary>
+    [HttpPost("change-password")]
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
+            return BadRequest("Token, current password, and new password are required");
+
+        var principal = _jwtService.ValidateToken(request.Token);
+        if (principal == null)
+            return Unauthorized("Invalid or expired token");
+
+        var userIdClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized("Invalid token claims");
+
+        var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+        if (user == null)
+            return Unauthorized("User not found");
+
+        if (!_passwordService.VerifyPassword(request.CurrentPassword, user.PasswordHash))
+            return Unauthorized("Current password is incorrect");
+
+        user.PasswordHash = _passwordService.HashPassword(request.NewPassword);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Password changed successfully" });
+    }
+
+    /// <summary>
     /// Delete the entire couple account and all associated data
     /// </summary>
     [HttpDelete("delete-account")]
@@ -224,6 +254,13 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { error = "Error deleting account: " + ex.Message });
         }
     }
+}
+
+public class ChangePasswordRequest
+{
+    public string Token { get; set; } = string.Empty;
+    public string CurrentPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
 }
 
 public class DeleteAccountRequest

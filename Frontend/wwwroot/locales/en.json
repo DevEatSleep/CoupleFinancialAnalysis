@@ -88,6 +88,9 @@
     "score90": "✅ Very good equality in the couple!",
     "score70": "🟡 Slight imbalance, some adjustments possible.",
     "score50": "🟠 Notable inequality. A conversation is needed.",
-    "score0": "🔴 Strong inequality detected. Review the distribution."
+    "score0": "🔴 Strong inequality detected. Review the distribution.",
+    "howCalculated": "ℹ️ How is this calculated?",
+    "financialGapExplain": "Financial gap: difference between each person's share of expenses and their share of combined income. 0 pts = each pays proportionally to their salary.",
+    "domesticGapExplain": "Domestic work gap: measures how far the declared household hours deviate from a 50/50 split. 0 pts = perfectly equal sharing."
   }
 }

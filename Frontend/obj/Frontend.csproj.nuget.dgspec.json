@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj": {}
+    "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj": {
+    "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj",
         "projectName": "Frontend",
-        "projectPath": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj",
-        "packagesPath": "C:\\Users\\VerdierThierry\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Frontend\\obj\\",
+        "projectPath": "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Frontend\\Frontend.csproj",
+        "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Frontend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\VerdierThierry\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -26,8 +26,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Shared\\Shared.csproj": {
-                "projectPath": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Shared\\Shared.csproj"
+              "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Shared\\Shared.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Shared\\Shared.csproj"
               }
             }
           }
@@ -51,7 +51,7 @@
             "Microsoft.AspNetCore.App.Internal.Assets": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.7, )",
+              "version": "[10.0.5, )",
               "autoReferenced": true
             },
             "Microsoft.AspNetCore.Components.WebAssembly": {
@@ -65,7 +65,7 @@
             },
             "Microsoft.DotNet.HotReload.WebAssembly.Browser": {
               "target": "Package",
-              "version": "[10.0.203, )",
+              "version": "[10.0.201, )",
               "autoReferenced": true
             },
             "Microsoft.Extensions.Http": {
@@ -75,13 +75,13 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.7, )",
+              "version": "[10.0.5, )",
               "autoReferenced": true
             },
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.7, )",
+              "version": "[10.0.5, )",
               "autoReferenced": true
             }
           },
@@ -99,7 +99,7 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-              "version": "[10.0.7, 10.0.7]"
+              "version": "[10.0.5, 10.0.5]"
             }
           ],
           "frameworkReferences": {
@@ -107,7 +107,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -390,17 +390,17 @@
         }
       }
     },
-    "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Shared\\Shared.csproj": {
+    "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Shared\\Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Shared\\Shared.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Shared\\Shared.csproj",
         "projectName": "Shared",
-        "projectPath": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Shared\\Shared.csproj",
-        "packagesPath": "C:\\Users\\VerdierThierry\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\VerdierThierry\\Documents\\CoupleFinancialAnalysis\\Shared\\obj\\",
+        "projectPath": "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Shared\\Shared.csproj",
+        "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Lenovo\\Documents\\devs\\CoupleFinancialAnalysis\\Shared\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\VerdierThierry\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -445,7 +445,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",

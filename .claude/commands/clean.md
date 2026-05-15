@@ -1,0 +1,1 @@
+Clean $ARGUMENTS: remove dead code, unused imports, and duplication. Simplify overly complex logic where possible. Follow SOLID and the existing conventions. Provide a minimal diff with no behavioral changes.
