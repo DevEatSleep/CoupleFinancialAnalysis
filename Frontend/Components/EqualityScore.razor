@@ -6,7 +6,7 @@
 
 @if (!HasAnyData)
 {
-    <p class="empty-state">@Loc.T("equality.noData")</p>
+    <p class="empty-state">@MissingDataMessage</p>
 }
 else
 {
@@ -15,6 +15,7 @@ else
             <span class="equality-score-label">@Loc.T("equality.score")</span>
             <span class="equality-score-value" style="color: @ScoreColor">@Score.ToString("F1") / 100</span>
         </div>
+        <p style="margin: 0 0 6px; font-size: 0.78em; color: #888; text-align: right">@Loc.T("equality.scorePerfect")</p>
         <div class="equality-bar-bg">
             <div class="equality-bar-fill" style="width: @Score.ToString("F0")%; background: @ScoreColor"></div>
         </div>
@@ -24,15 +25,15 @@ else
                 {
                     <tr>
                         <td>@Loc.T("equality.financialGap")</td>
-                        <td><strong>@DeltaFinancial.ToString("F1") pts</strong></td>
+                        <td><strong>Δ @DeltaFinancial.ToString("F1") / 100</strong></td>
                         <td><small style="color:#888">@FinancialFavors</small></td>
                     </tr>
                     <tr>
-                        <td>@Loc.T("equality.netWoman")</td>
+                        <td>@Loc.T("equality.disposableWoman")</td>
                         <td colspan="2"><strong>@WomanNet.ToString("F0") €</strong></td>
                     </tr>
                     <tr>
-                        <td>@Loc.T("equality.netMan")</td>
+                        <td>@Loc.T("equality.disposableMan")</td>
                         <td colspan="2"><strong>@ManNet.ToString("F0") €</strong></td>
                     </tr>
                 }
@@ -40,8 +41,14 @@ else
                 {
                     <tr>
                         <td>@Loc.T("equality.domesticGap")</td>
-                        <td><strong>@DeltaDomestic.ToString("F1") pts</strong></td>
+                        <td><strong>Δ @DeltaDomestic.ToString("F1") / 100</strong></td>
                         <td><small style="color:#888">@DomesticFavors</small></td>
+                    </tr>
+                }
+                @if (!HasFinancial && (TotalSalary > 0 || TotalExp > 0))
+                {
+                    <tr>
+                        <td colspan="3" style="color: #888; font-style: italic; font-size: 0.85em; padding: 6px 0">@FinancialProgressHint</td>
                     </tr>
                 }
                 @if (HasFinancial || HasDomestic)
@@ -58,7 +65,7 @@ else
                         <td colspan="2"><strong>@ManContribution.ToString("F0") €</strong></td>
                     </tr>
                     <tr>
-                        <td>@Loc.T("equality.topContributor")</td>
+                        <td>@Loc.T("equality.largestContribution")</td>
                         <td colspan="2"><strong>@TopContributor</strong></td>
                     </tr>
                 }
@@ -99,6 +106,20 @@ else
     private bool HasFinancial => TotalSalary > 0 && TotalExp > 0;
     private bool HasDomestic  => TotalHours > 0;
     private bool HasAnyData   => HasFinancial || HasDomestic;
+
+    private string MissingDataMessage
+    {
+        get
+        {
+            if (TotalSalary > 0 && TotalExp == 0) return Loc.T("equality.missingExpenses");
+            if (TotalSalary == 0 && TotalExp > 0) return Loc.T("equality.missingSalaries");
+            return Loc.T("equality.missingBoth");
+        }
+    }
+
+    private string FinancialProgressHint => TotalSalary > 0
+        ? Loc.T("equality.missingExpenses")
+        : Loc.T("equality.missingSalaries");
 
     private decimal DeltaFinancial => HasFinancial
         ? Math.Abs(WomanExp / TotalExp - WomanSalary / TotalSalary) * 100
