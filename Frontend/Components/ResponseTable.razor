@@ -30,21 +30,21 @@
                         @(IsEditing(State.WomanData.NameId) ? "" : DisplayWomanName)
                         @if (IsEditing(State.WomanData.NameId))
                         {
-                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="text" @bind:event="oninput"  @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                     </td>
                     <td class="editable" @onclick="() => StartEdit(State.WomanData.AgeId, State.WomanData.Age)">
                         @(IsEditing(State.WomanData.AgeId) ? "" : State.WomanData.Age)
                         @if (IsEditing(State.WomanData.AgeId))
                         {
-                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="text" @bind:event="oninput" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                     </td>
                     <td class="editable" @onclick="() => StartEdit(State.WomanData.SalaryId, State.WomanData.Salary)">
                         @(IsEditing(State.WomanData.SalaryId) ? "" : State.WomanData.Salary)
                         @if (IsEditing(State.WomanData.SalaryId))
                         {
-                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="text" @bind:event="oninput" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                     </td>
                     <td>
@@ -60,21 +60,21 @@
                         @(IsEditing(State.ManData.NameId) ? "" : DisplayManName)
                         @if (IsEditing(State.ManData.NameId))
                         {
-                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="text" @bind:event="oninput" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                     </td>
                     <td class="editable" @onclick="() => StartEdit(State.ManData.AgeId, State.ManData.Age)">
                         @(IsEditing(State.ManData.AgeId) ? "" : State.ManData.Age)
                         @if (IsEditing(State.ManData.AgeId))
                         {
-                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="text" @bind:event="oninput" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                     </td>
                     <td class="editable" @onclick="() => StartEdit(State.ManData.SalaryId, State.ManData.Salary)">
                         @(IsEditing(State.ManData.SalaryId) ? "" : State.ManData.Salary)
                         @if (IsEditing(State.ManData.SalaryId))
                         {
-                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="text" @bind:event="oninput" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                     </td>
                     <td>

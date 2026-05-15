@@ -27,7 +27,7 @@
                     <td class="editable" @onclick="() => StartEdit(expense.Id, FieldLabel, expense.Label)">
                         @if (IsEditing(expense.Id, FieldLabel))
                         {
-                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="text" @bind:event="oninput"  @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                         else
                         {
@@ -37,7 +37,7 @@
                     <td class="editable" @onclick="() => StartEdit(expense.Id, FieldAmount, expense.Amount.ToString())">
                         @if (IsEditing(expense.Id, FieldAmount))
                         {
-                            <input type="number" step="0.01" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="number" @bind:event="oninput" step="0.01" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                         else
                         {
@@ -47,7 +47,7 @@
                     <td class="editable" @onclick="() => StartEdit(expense.Id, FieldPaidBy, expense.PaidBy)">
                         @if (IsEditing(expense.Id, FieldPaidBy))
                         {
-                            <input type="text" @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
+                            <input type="text" @bind:event="oninput"  @bind="EditValue" @onblur="SaveEdit" @onkeydown="HandleEditKey" autofocus style="width:100%;" />
                         }
                         else
                         {

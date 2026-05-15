@@ -4,6 +4,8 @@ using Frontend;
 using Frontend.Services;
 using Shared;
 
+
+
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -11,7 +13,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // HttpClient for API calls → backend
 builder.Services.AddHttpClient("Api", client =>
 {
-    client.BaseAddress = new Uri(Constants.Network.ServerUrl);
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
 });
 
 // HttpClient for local static files (locale JSON)
