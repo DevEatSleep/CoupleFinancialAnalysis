@@ -49,7 +49,7 @@ public class SurveyController : ControllerBase
             .Where(r => r.CoupleId == coupleId)
             .Select(r => r.QuestionId)
             .ToHashSet();
-        var question = _botService.GetNextQuestionForPerson(person, answered);
+        var question = _botService.GetNextQuestionForPerson(person, answered, coupleId);
         if (question == null)
             return BadRequest($"No more questions available for {person}");
 

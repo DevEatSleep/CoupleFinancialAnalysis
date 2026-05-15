@@ -108,7 +108,7 @@ public class BotService
         return question;
     }
 
-    public Question? GetNextQuestionForPerson(string person, HashSet<int> answeredQuestionIds)
+    public Question? GetNextQuestionForPerson(string person, HashSet<int> answeredQuestionIds, int coupleId)
     {
         // Exclude travail_domestique questions — those are handled entirely by the frontend domestique flow
         var personQuestions = _questions
@@ -122,11 +122,9 @@ public class BotService
         // Shared questions (expenses) cycle so users can add multiple expenses
         if (person == SharedConstants.PersonTypes.Shared)
         {
-            // Use a session index so the cycle advances within a session; acceptable to reset on restart
-            var coupleKey = answeredQuestionIds.GetHashCode();
-            var idx = _sharedIndices.GetValueOrDefault(coupleKey, 0) % personQuestions.Count;
+            var idx = _sharedIndices.GetValueOrDefault(coupleId, 0) % personQuestions.Count;
             var selectedQuestion = personQuestions[idx];
-            _sharedIndices[coupleKey] = (idx + 1) % personQuestions.Count;
+            _sharedIndices[coupleId] = (idx + 1) % personQuestions.Count;
             return selectedQuestion;
         }
 
