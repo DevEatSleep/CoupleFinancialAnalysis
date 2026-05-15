@@ -1,111 +1,74 @@
-# 📄 **prompts.md — Claude Code Prompt Library (English Version)**
+# Prompt Library — CoupleFinancialAnalysis
 
-## 🧱 **1. Editing Existing Code**
-- **Edit a function**  
-  “Edit the function in @file.ts.  
-  Apply a minimal diff, follow SOLID principles, and briefly explain the changes.”
-
-- **Fix a bug**  
-  “Analyze the bug in @file.ts, identify the root cause, propose a clean fix, and provide an associated test.”
-
-- **Refactor cleanly**  
-  “Refactor this module while respecting SOLID.  
-  Do not change anything unnecessary. Provide a clear diff.”
+Slash commands handle most tasks. Use the free-form prompts below only for cases not covered by a command.
 
 ---
 
-## 🧩 **2. Multi‑File Work (Composer)**
-- **Multi‑file refactor**  
-  “Use Composer to refactor these files: @src/service, @src/utils.  
-  Provide a plan before making changes. Follow SOLID.”
+## Slash Commands (use these first)
 
-- **Create a new feature**  
-  “Create the feature ‘X’.  
-  Generate required files, architecture, interfaces, and tests.  
-  Use Composer to structure everything cleanly.”
-
-- **Technical migration**  
-  “Migrate this module to <new tech>.  
-  Provide a plan, then apply diffs file by file.”
-
----
-
-## 🧠 **3. Analysis & Architecture**
-- **Analyze the project**  
-  “Analyze the entire codebase.  
-  Identify SOLID violations, technical debt, and duplication.  
-  Provide a prioritized improvement plan.”
-
-- **Design an architecture**  
-  “Propose a clean architecture for this module.  
-  Follow SOLID, DDD when relevant, and existing project conventions.”
-
-- **Code quality audit**  
-  “Perform a quality audit on @src.  
-  List issues, risks, inconsistencies, and propose fixes.”
+| Command | When to use |
+|---|---|
+| `/fix @Controller.cs` | Diagnose and fix a bug, get a regression test |
+| `/refactor @Service.cs` | Clean refactor with minimal diff, SOLID-compliant |
+| `/feature add language persistence` | New feature — plan first, then code |
+| `/test @BotService.cs` | Generate unit tests for a file |
+| `/audit @Controllers/` | Code quality audit with prioritized issues |
+| `/clean @Home.razor` | Remove dead code, unused imports, duplication |
+| `/security @AuthController.cs` | Security vulnerability scan with fixes |
+| `/analyze` | Full codebase SOLID audit and improvement plan |
+| `/commit` | Generate a Conventional Commit from staged changes |
 
 ---
 
-## 🧪 **4. Testing**
-- **Generate tests**  
-  “Generate unit tests for @file.ts.  
-  Cover edge cases, errors, and expected behavior.”
+## Free-form Prompts (not covered by slash commands)
 
-- **Update tests**  
-  “Update tests impacted by this change.  
-  Explain what was modified.”
+### Architecture
 
-- **Create a test plan**  
-  “Provide a complete test plan for this feature.”
+```
+Propose a clean architecture for [module].
+Follow SOLID, respect the existing project conventions (ASP.NET Core controllers,
+Blazor WASM services, shared constants in Shared/Constants.cs).
+```
 
----
+### Technical migration
 
-## 🔄 **5. Git & Smart Commits**
-- **Generate a commit message**  
-  “Generate a Conventional Commit message based on the diffs.  
-  Format: type(scope): short description.”
+```
+Migrate @OldService.cs to [new approach].
+Propose a plan file by file, then apply diffs one at a time.
+```
 
-- **Automatic commit**  
-  “After applying the diffs, propose a commit message, then run:  
-  `git add . && git commit -m "<message>"`  
-  (only after my approval).”
+### Update tests after a change
 
-- **Clean commit history**  
-  “Group these changes into a single coherent commit.  
-  Provide a clear message.”
+```
+Update the tests impacted by the changes made to @Service.cs.
+Explain what changed and why each test was updated.
+```
 
----
+### Test plan for a feature
 
-## 🧼 **6. Cleanup & Optimization**
-- **Clean the code**  
-  “Clean this file: dead code, duplication, unused imports.  
-  Follow SOLID and existing conventions.”
+```
+Write a complete test plan for the [feature] feature.
+Cover happy path, edge cases, and error scenarios.
+```
 
-- **Optimize performance**  
-  “Optimize this function for performance without changing behavior.”
+### Performance optimization
 
-- **Simplify a module**  
-  “Simplify this overly complex module.  
-  Propose an SRP‑compliant breakdown.”
+```
+Optimize @Method.cs for performance without changing its observable behavior.
+Explain the bottleneck and the fix.
+```
 
----
+### Commit history cleanup
 
-## 🛠️ **7. Code Creation**
-- **Create a service**  
-  “Create a SOLID‑compliant service with interface, implementation, and tests.”
+```
+Group the current staged changes into a single coherent commit.
+Propose a Conventional Commit message: type(scope): description.
+```
 
-- **Create a UI component**  
-  “Create a clean, typed, testable, and documented UI component.”
+### Add strict input validation
 
-- **Create an API endpoint**  
-  “Create a full API endpoint: route, controller, service, validation, tests.”
-
----
-
-## 🔒 **8. Security**
-- **Security audit**  
-  “Analyze this module for security vulnerabilities.  
-  Propose fixes.”
-
-- **Strict validation**  
-  “Add strong validation to prevent injections, XSS, and other attacks.”
+```
+Add strong input validation to @Controller.cs.
+Prevent injection, missing fields, and out-of-range values.
+Follow the existing validation style in the project.
+```
