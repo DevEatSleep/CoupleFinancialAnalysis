@@ -467,6 +467,8 @@
             var result = await AuthService.DeleteAccountAsync(ConfirmPassword);
             if (result)
             {
+                ShowConfirmModal = false;
+                ConfirmPassword = string.Empty;
                 AuthService.Logout();
                 NavigationManager.NavigateTo("/login");
             }
