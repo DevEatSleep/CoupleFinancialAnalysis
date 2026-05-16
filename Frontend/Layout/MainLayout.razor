@@ -28,15 +28,41 @@
 
 @if (ShowSettingsModal)
 {
-    <div class="modal-overlay" @onclick="() => ShowSettingsModal = false">
-        <div class="modal-content" @onclick:stopPropagation="true">
+    <div class="modal-overlay" @onclick="CloseSettings">
+        <div class="modal-content settings-modal" @onclick:stopPropagation="true">
             <div class="modal-header">
-                <h2>Paramètres du compte</h2>
-                <button class="btn-close" @onclick="() => ShowSettingsModal = false">&times;</button>
+                <h2>⚙️ Paramètres du compte</h2>
+                <button class="btn-close" @onclick="CloseSettings">&times;</button>
             </div>
             <div class="modal-body">
-                <p>Attention: Cette action est irréversible.</p>
-                <button class="btn-delete-account" @onclick="ConfirmDelete">🗑️ Supprimer mon compte</button>
+                <div class="settings-section">
+                    <h3>🔑 Changer le mot de passe</h3>
+                    <div class="form-group">
+                        <label>Mot de passe actuel</label>
+                        <input type="password" class="form-control" @bind="CurrentPassword" placeholder="Mot de passe actuel" />
+                    </div>
+                    <div class="form-group">
+                        <label>Nouveau mot de passe</label>
+                        <input type="password" class="form-control" @bind="NewPassword" placeholder="Nouveau mot de passe" />
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmer le nouveau mot de passe</label>
+                        <input type="password" class="form-control" @bind="ConfirmNewPassword" placeholder="Confirmer le mot de passe" />
+                    </div>
+                    @if (!string.IsNullOrEmpty(ChangePwdMessage))
+                    {
+                        <div class="@(ChangePwdSuccess ? "alert alert-success" : "alert alert-danger")">@ChangePwdMessage</div>
+                    }
+                    <button class="btn btn-primary" @onclick="HandleChangePassword" disabled="@ChangePwdLoading">
+                        @(ChangePwdLoading ? "Enregistrement..." : "Enregistrer")
+                    </button>
+                </div>
+
+                <div class="settings-section danger-zone">
+                    <h3>⚠️ Zone de danger</h3>
+                    <p>La suppression de votre compte est <strong>irréversible</strong>.</p>
+                    <button class="btn-delete-account" @onclick="ConfirmDelete">🗑️ Supprimer mon compte</button>
+                </div>
             </div>
         </div>
     </div>
@@ -293,15 +319,74 @@
         color: #721c24;
         border: 1px solid #f5c6cb;
     }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .btn-primary {
+        background-color: #667eea;
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background-color: #5568d3;
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .settings-modal {
+        max-width: 480px;
+    }
+
+    .settings-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .settings-section h3 {
+        margin: 0 0 1rem;
+        font-size: 1rem;
+        color: #333;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .danger-zone {
+        border: 1px solid #f5c6cb;
+        border-radius: 6px;
+        padding: 1rem;
+        background: #fff5f5;
+        margin-bottom: 0;
+    }
+
+    .danger-zone h3 {
+        color: #c0392b;
+        border-bottom-color: #f5c6cb;
+    }
 </style>
 
 @code {
     private AuthUser? CurrentUser;
     private bool ShowSettingsModal = false;
     private bool ShowConfirmModal = false;
+
+    // Delete account
     private string ConfirmPassword = string.Empty;
     private string ErrorMessage = string.Empty;
     private bool IsDeleting = false;
+
+    // Change password
+    private string CurrentPassword = string.Empty;
+    private string NewPassword = string.Empty;
+    private string ConfirmNewPassword = string.Empty;
+    private bool ChangePwdLoading = false;
+    private string ChangePwdMessage = string.Empty;
+    private bool ChangePwdSuccess = false;
 
     protected override void OnInitialized()
     {
@@ -323,6 +408,38 @@
     private void ShowSettings()
     {
         ShowSettingsModal = true;
+    }
+
+    private void CloseSettings()
+    {
+        ShowSettingsModal = false;
+        CurrentPassword = NewPassword = ConfirmNewPassword = ChangePwdMessage = string.Empty;
+        ChangePwdLoading = ChangePwdSuccess = false;
+    }
+
+    private async Task HandleChangePassword()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentPassword) || string.IsNullOrWhiteSpace(NewPassword))
+        {
+            ChangePwdMessage = "Tous les champs sont requis";
+            ChangePwdSuccess = false;
+            return;
+        }
+        if (NewPassword != ConfirmNewPassword)
+        {
+            ChangePwdMessage = "Les mots de passe ne correspondent pas";
+            ChangePwdSuccess = false;
+            return;
+        }
+
+        ChangePwdLoading = true;
+        ChangePwdMessage = string.Empty;
+        var (success, error) = await AuthService.ChangePasswordAsync(CurrentPassword, NewPassword);
+        ChangePwdLoading = false;
+        ChangePwdSuccess = success;
+        ChangePwdMessage = success ? "Mot de passe changé avec succès" : "Erreur : " + error.Trim('"');
+        if (success)
+            CurrentPassword = NewPassword = ConfirmNewPassword = string.Empty;
     }
 
     private void ConfirmDelete()
