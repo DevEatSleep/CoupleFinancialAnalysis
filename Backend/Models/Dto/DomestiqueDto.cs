@@ -38,6 +38,14 @@ public class DomestiqueResponseDto
 }
 
 /// <summary>
+/// Request body for updating a single INSEE reference record.
+/// </summary>
+public class UpdateReferenceRequest
+{
+    public int DureeMinutes { get; set; }
+}
+
+/// <summary>
 /// DTO for aggregated domestic work statistics by gender and activity.
 /// </summary>
 public class DomestiqueStatisticsDto
