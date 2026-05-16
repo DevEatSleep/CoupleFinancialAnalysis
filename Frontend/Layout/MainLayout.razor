@@ -2,13 +2,14 @@
 @using Frontend.Services
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
+@implements IDisposable
 
 <div class="main-layout">
     <header class="navbar">
         <div class="navbar-brand">
             <h1>💑 Couple Financial Analysis</h1>
         </div>
-        <div class="navbar-menu">c
+        <div class="navbar-menu">
             @if (CurrentUser != null)
             {
                 <span class="user-info">
@@ -305,6 +306,18 @@
     protected override void OnInitialized()
     {
         CurrentUser = AuthService.GetCurrentUser();
+        AuthService.OnAuthStateChanged += OnAuthChanged;
+    }
+
+    private void OnAuthChanged()
+    {
+        CurrentUser = AuthService.GetCurrentUser();
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnAuthStateChanged -= OnAuthChanged;
     }
 
     private void ShowSettings()

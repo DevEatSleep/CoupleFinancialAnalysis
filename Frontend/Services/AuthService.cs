@@ -65,6 +65,8 @@ public class AuthService
         }
     }
 
+    public event Action? OnAuthStateChanged;
+
     public void SaveToken(AuthResponse authResponse)
     {
         if (authResponse == null)
@@ -79,6 +81,7 @@ public class AuthService
             Name = authResponse.Name,
             Token = authResponse.Token
         };
+        OnAuthStateChanged?.Invoke();
     }
 
     public AuthUser? GetCurrentUser()
@@ -149,6 +152,7 @@ public class AuthService
     {
         _currentToken = null;
         _currentUser = null;
+        OnAuthStateChanged?.Invoke();
     }
 }
 
