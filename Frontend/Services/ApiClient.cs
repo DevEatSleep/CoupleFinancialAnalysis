@@ -146,6 +146,22 @@ public class ApiClient
         return await _http.GetFromJsonAsync<List<DomestiqueReferenceDto>>(SharedConstants.ApiEndpoints.TravailDomestique) ?? [];
     }
 
+    public async Task<DomestiqueReferenceDto?> UpdateDomestiqueReferenceAsync(int id, int dureeMinutes)
+    {
+        AddAuthorizationHeader();
+        var response = await _http.PutAsJsonAsync($"{SharedConstants.ApiEndpoints.TravailDomestique}/{id}", new { DureeMinutes = dureeMinutes });
+        if (!response.IsSuccessStatusCode) return null;
+        return await response.Content.ReadFromJsonAsync<DomestiqueReferenceDto>();
+    }
+
+    public async Task<List<DomestiqueReferenceDto>> ResetDomestiqueReferencesAsync()
+    {
+        AddAuthorizationHeader();
+        var response = await _http.PostAsync($"{SharedConstants.ApiEndpoints.TravailDomestique}/reset", null);
+        if (!response.IsSuccessStatusCode) return [];
+        return await response.Content.ReadFromJsonAsync<List<DomestiqueReferenceDto>>() ?? [];
+    }
+
     /// <summary>
     /// Get reference data for a specific activity (returns average for both genders).
     /// </summary>

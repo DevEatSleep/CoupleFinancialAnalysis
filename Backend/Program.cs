@@ -131,42 +131,14 @@ using (var scope = app.Services.CreateScope())
     // Seed reference data if table is empty
     if (!await db.TravailDomestique.AnyAsync())
     {
-        // INSEE reference data: (activity, age range, femme minutes, homme minutes)
-        var donneesInsee = new (string, string, int, int)[]
+        foreach (var (activite, trancheAge, femmeMinutes, hommeMinutes) in DomestiqueReferenceService.DefaultInseeData)
         {
-            // 18-24 ans
-            (Constants.Domestique.Activities.CuisineEtMenage, Constants.Domestique.AgeRanges.Range18_24, 120, 70),
-            (Constants.Domestique.Activities.SoinsEnfants, Constants.Domestique.AgeRanges.Range18_24, 50, 30),
-            (Constants.Domestique.Activities.Courses, Constants.Domestique.AgeRanges.Range18_24, 25, 20),
-            (Constants.Domestique.Activities.BricolagJardinage, Constants.Domestique.AgeRanges.Range18_24, 10, 20),
-            // 25-34 ans
-            (Constants.Domestique.Activities.CuisineEtMenage, Constants.Domestique.AgeRanges.Range25_34, 140, 85),
-            (Constants.Domestique.Activities.SoinsEnfants, Constants.Domestique.AgeRanges.Range25_34, 95, 55),
-            (Constants.Domestique.Activities.Courses, Constants.Domestique.AgeRanges.Range25_34, 32, 28),
-            (Constants.Domestique.Activities.BricolagJardinage, Constants.Domestique.AgeRanges.Range25_34, 12, 35),
-            // 35-49 ans
-            (Constants.Domestique.Activities.CuisineEtMenage, Constants.Domestique.AgeRanges.Range35_49, 150, 90),
-            (Constants.Domestique.Activities.SoinsEnfants, Constants.Domestique.AgeRanges.Range35_49, 105, 60),
-            (Constants.Domestique.Activities.Courses, Constants.Domestique.AgeRanges.Range35_49, 34, 30),
-            (Constants.Domestique.Activities.BricolagJardinage, Constants.Domestique.AgeRanges.Range35_49, 15, 40),
-            // 50-64 ans
-            (Constants.Domestique.Activities.CuisineEtMenage, Constants.Domestique.AgeRanges.Range50_64, 130, 80),
-            (Constants.Domestique.Activities.SoinsEnfants, Constants.Domestique.AgeRanges.Range50_64, 30, 15),
-            (Constants.Domestique.Activities.Courses, Constants.Domestique.AgeRanges.Range50_64, 28, 25),
-            (Constants.Domestique.Activities.BricolagJardinage, Constants.Domestique.AgeRanges.Range50_64, 12, 35),
-        };
-
-        // Generate TravailDomestique records from the data (2 sexes per activity/age combo)
-        foreach (var (activite, trancheAge, femmeMinutes, hommeMinutes) in donneesInsee)
-        {
-            foreach (var (sexe, dureeMinutes) in new[] { 
-                (Constants.Domestique.Sexe.Femme, femmeMinutes), 
-                (Constants.Domestique.Sexe.Homme, hommeMinutes) 
+            foreach (var (sexe, dureeMinutes) in new[] {
+                (Constants.Domestique.Sexe.Femme, femmeMinutes),
+                (Constants.Domestique.Sexe.Homme, hommeMinutes)
             })
             {
                 var dureeHeures = Math.Round((decimal)dureeMinutes / 60m, 2);
-                var coutJour = Math.Round(dureeHeures * Constants.Domestique.HourlyRate, 2);
-
                 db.TravailDomestique.Add(new TravailDomestique
                 {
                     Sexe = sexe,
@@ -174,7 +146,7 @@ using (var scope = app.Services.CreateScope())
                     TrancheAge = trancheAge,
                     DureeMinutes = dureeMinutes,
                     DureeHeures = dureeHeures,
-                    CoutJour = coutJour
+                    CoutJour = Math.Round(dureeHeures * Constants.Domestique.HourlyRate, 2)
                 });
             }
         }

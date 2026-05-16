@@ -322,6 +322,7 @@ Pages/
  Home.razor
  Login.razor
  NotFound.razor
+ ReferenceSettings.razor
 _Imports.razor
 
 [dynamicFiles]
@@ -337,4 +338,5 @@ Pages/
  Home.razor
  Login.razor
  NotFound.razor
+ ReferenceSettings.razor
 _Imports.razor

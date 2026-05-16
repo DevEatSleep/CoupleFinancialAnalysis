@@ -1,0 +1,288 @@
+@page "/reference"
+@using Frontend.Services
+@using Shared
+@inject ApiClient Api
+@inject BotService Bot
+@inject NavigationManager NavigationManager
+@inject LocalizationService Loc
+@implements IDisposable
+
+<div class="reference-page">
+    <div class="reference-header">
+        <div class="header-top">
+            <button class="btn-back" @onclick='() => NavigationManager.NavigateTo("/")'>@Loc.T("reference.backButton")</button>
+            <h1>@Loc.T("reference.title")</h1>
+        </div>
+        <p>@Loc.T("reference.description")</p>
+    </div>
+
+    @if (_loading)
+    {
+        <p class="loading">@Loc.T("reference.loading")</p>
+    }
+    else if (_records.Count == 0)
+    {
+        <p class="empty">@Loc.T("reference.noData")</p>
+    }
+    else
+    {
+        @foreach (var activite in _activities)
+        {
+            <div class="activity-block">
+                <h2>@activite</h2>
+                <table class="reference-table">
+                    <thead>
+                        <tr>
+                            <th>@Loc.T("reference.ageRange")</th>
+                            <th>@Loc.T("reference.womanHeader")</th>
+                            <th>@Loc.T("reference.manHeader")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var range in _ageRanges)
+                        {
+                            var femme = _records.FirstOrDefault(r => r.Activite == activite && r.TrancheAge == range && r.Sexe == "femme");
+                            var homme = _records.FirstOrDefault(r => r.Activite == activite && r.TrancheAge == range && r.Sexe == "homme");
+                            <tr>
+                                <td>@range</td>
+                                <td>
+                                    @if (femme != null)
+                                    {
+                                        <input type="number" min="0" max="1440" class="minutes-input"
+                                               value="@_edits[femme.Id]"
+                                               @onchange="e => OnMinutesChanged(femme.Id, e.Value?.ToString())" />
+                                    }
+                                </td>
+                                <td>
+                                    @if (homme != null)
+                                    {
+                                        <input type="number" min="0" max="1440" class="minutes-input"
+                                               value="@_edits[homme.Id]"
+                                               @onchange="e => OnMinutesChanged(homme.Id, e.Value?.ToString())" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_message))
+        {
+            <div class="@(_isError ? "msg-error" : "msg-success")">@_message</div>
+        }
+
+        <div class="actions">
+            <button class="btn-save" @onclick="SaveChanges" disabled="@_saving">
+                @(_saving ? Loc.T("reference.savingButton") : Loc.T("reference.saveButton"))
+            </button>
+            <button class="btn-reset" @onclick="ResetToDefaults" disabled="@_saving">
+                @Loc.T("reference.resetButton")
+            </button>
+            <button class="btn-back" @onclick='() => NavigationManager.NavigateTo("/")'>
+                @Loc.T("reference.backButton")
+            </button>
+        </div>
+    }
+</div>
+
+<style>
+    .reference-page {
+        height: 100%;
+        overflow-y: auto;
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+        font-family: inherit;
+    }
+
+    .header-top {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .reference-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .reference-header p {
+        color: #555;
+        margin-bottom: 2rem;
+    }
+
+    .activity-block {
+        margin-bottom: 2rem;
+    }
+
+    .activity-block h2 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        color: #444;
+        text-transform: capitalize;
+    }
+
+    .reference-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .reference-table th,
+    .reference-table td {
+        padding: 0.6rem 1rem;
+        border: 1px solid #e0e0e0;
+        text-align: left;
+    }
+
+    .reference-table th {
+        background: #f5f5f5;
+        font-weight: 600;
+    }
+
+    .reference-table tr:hover {
+        background: #fafafa;
+    }
+
+    .minutes-input {
+        width: 80px;
+        padding: 0.3rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .minutes-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    }
+
+    .actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-save {
+        padding: 0.6rem 1.4rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .btn-save:hover:not(:disabled) { background: #5568d3; }
+    .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-reset {
+        padding: 0.6rem 1.4rem;
+        background: #fff;
+        color: #c0392b;
+        border: 1px solid #c0392b;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .btn-reset:hover:not(:disabled) { background: #fff5f5; }
+    .btn-reset:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-back {
+        padding: 0.6rem 1.4rem;
+        background: #eee;
+        color: #333;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .btn-back:hover { background: #ddd; }
+
+    .msg-success { color: #2e7d32; margin-top: 1rem; font-size: 0.95rem; }
+    .msg-error   { color: #c62828; margin-top: 1rem; font-size: 0.95rem; }
+    .loading, .empty { color: #888; margin-top: 2rem; }
+</style>
+
+@code {
+    private List<DomestiqueReferenceDto> _records = [];
+    private Dictionary<int, int> _edits = [];
+    private bool _loading = true;
+    private bool _saving = false;
+    private string _message = string.Empty;
+    private bool _isError = false;
+
+    private static readonly string[] _activities = Constants.Domestique.Activities.All;
+    private static readonly string[] _ageRanges  = Constants.Domestique.AgeRanges.All;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loc.OnLanguageChanged += OnLanguageChanged;
+        await LoadAsync();
+    }
+
+    private void OnLanguageChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _records = await Api.GetDomestiqueReferencesAsync();
+        _edits = _records.ToDictionary(r => r.Id, r => (int)r.DureeMinutes);
+        _loading = false;
+    }
+
+    private void OnMinutesChanged(int id, string? raw)
+    {
+        if (int.TryParse(raw, out var val))
+            _edits[id] = Math.Clamp(val, 0, 1440);
+    }
+
+    private async Task SaveChanges()
+    {
+        _saving = true;
+        _message = string.Empty;
+        var errors = 0;
+
+        foreach (var record in _records)
+        {
+            if (_edits.TryGetValue(record.Id, out var newMinutes) && newMinutes != (int)record.DureeMinutes)
+            {
+                var updated = await Api.UpdateDomestiqueReferenceAsync(record.Id, newMinutes);
+                if (updated == null) errors++;
+                else record.DureeMinutes = updated.DureeMinutes;
+            }
+        }
+
+        await Bot.LoadInseeReferencesAsync();
+        _saving = false;
+        _isError = errors > 0;
+        _message = errors > 0
+            ? $"{errors} {Loc.T("reference.saveError")}"
+            : Loc.T("reference.saveSuccess");
+    }
+
+    private async Task ResetToDefaults()
+    {
+        _saving = true;
+        _message = string.Empty;
+        _records = await Api.ResetDomestiqueReferencesAsync();
+        _edits = _records.ToDictionary(r => r.Id, r => (int)r.DureeMinutes);
+        await Bot.LoadInseeReferencesAsync();
+        _saving = false;
+        _isError = false;
+        _message = Loc.T("reference.resetSuccess");
+    }
+}

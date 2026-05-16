@@ -57,7 +57,7 @@ public class BotService
     /// <summary>
     /// Fetch INSEE reference data from the backend API and cache locally.
     /// </summary>
-    private async Task LoadInseeReferencesAsync()
+    public async Task LoadInseeReferencesAsync()
     {
         try
         {

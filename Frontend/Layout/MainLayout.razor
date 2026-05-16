@@ -3,6 +3,7 @@
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
 @inject ChatState ChatState
+@inject LocalizationService Loc
 @implements IDisposable
 
 <div class="main-layout">
@@ -16,8 +17,8 @@
                 <span class="user-info">
                     👩 @ChatState.GetFirstName("woman") &amp; 👨 @ChatState.GetFirstName("man")
                 </span>
-                <button class="btn-settings" @onclick="ShowSettings">⚙️ Paramètres</button>
-                <button class="btn-logout" @onclick="Logout">Déconnexion</button>
+                <button class="btn-settings" @onclick="ShowSettings">@Loc.T("settings.settingsButton")</button>
+                <button class="btn-logout" @onclick="Logout">@Loc.T("settings.logoutButton")</button>
             }
         </div>
     </header>
@@ -32,38 +33,44 @@
     <div class="modal-overlay" @onclick="CloseSettings">
         <div class="modal-content settings-modal" @onclick:stopPropagation="true">
             <div class="modal-header">
-                <h2>⚙️ Paramètres du compte</h2>
+                <h2>@Loc.T("settings.title")</h2>
                 <button class="btn-close" @onclick="CloseSettings">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="settings-section">
-                    <h3>🔑 Changer le mot de passe</h3>
+                    <h3>@Loc.T("settings.changePasswordTitle")</h3>
                     <div class="form-group">
-                        <label>Mot de passe actuel</label>
-                        <input type="password" class="form-control" @bind="CurrentPassword" placeholder="Mot de passe actuel" />
+                        <label>@Loc.T("settings.currentPassword")</label>
+                        <input type="password" class="form-control" @bind="CurrentPassword" placeholder="@Loc.T("settings.currentPassword")" />
                     </div>
                     <div class="form-group">
-                        <label>Nouveau mot de passe</label>
-                        <input type="password" class="form-control" @bind="NewPassword" placeholder="Nouveau mot de passe" />
+                        <label>@Loc.T("settings.newPassword")</label>
+                        <input type="password" class="form-control" @bind="NewPassword" placeholder="@Loc.T("settings.newPassword")" />
                     </div>
                     <div class="form-group">
-                        <label>Confirmer le nouveau mot de passe</label>
-                        <input type="password" class="form-control" @bind="ConfirmNewPassword" placeholder="Confirmer le mot de passe" />
+                        <label>@Loc.T("settings.confirmPassword")</label>
+                        <input type="password" class="form-control" @bind="ConfirmNewPassword" placeholder="@Loc.T("settings.confirmPassword")" />
                     </div>
                     @if (!string.IsNullOrEmpty(ChangePwdMessage))
                     {
                         <div class="@(ChangePwdSuccess ? "alert alert-success" : "alert alert-danger")">@ChangePwdMessage</div>
                     }
                     <button class="btn btn-primary" @onclick="HandleChangePassword" disabled="@ChangePwdLoading">
-                        @(ChangePwdLoading ? "Enregistrement..." : "Enregistrer")
+                        @(ChangePwdLoading ? Loc.T("settings.savingButton") : Loc.T("settings.saveButton"))
                     </button>
                 </div>
 
+                <div class="settings-section">
+                    <h3>@Loc.T("settings.referenceTitle")</h3>
+                    <p>@Loc.T("settings.referenceDescription")</p>
+                    <button class="btn btn-primary" @onclick="GoToReference">@Loc.T("settings.referenceButton")</button>
+                </div>
+
                 <div class="settings-section danger-zone">
-                    <h3>⚠️ Zone de danger</h3>
-                    <p>La suppression de votre compte est <strong>irréversible</strong>.</p>
+                    <h3>@Loc.T("settings.dangerZoneTitle")</h3>
+                    <p>@Loc.T("settings.deleteWarning")</p>
                     <br />
-                    <button class="btn-delete-account" @onclick="ConfirmDelete">🗑️ Supprimer mon compte</button>
+                    <button class="btn-delete-account" @onclick="ConfirmDelete">@Loc.T("settings.deleteButton")</button>
                 </div>
             </div>
         </div>
@@ -75,13 +82,13 @@
     <div class="modal-overlay">
         <div class="modal-content modal-danger">
             <div class="modal-header">
-                <h2>Confirmer la suppression</h2>
+                <h2>@Loc.T("settings.confirmDeleteTitle")</h2>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer votre compte? Cette action est <strong>irréversible</strong>.</p>
+                <p>@Loc.T("settings.deleteConfirmText")</p>
                 <div class="form-group">
-                    <label for="password">Confirmer en entrant votre mot de passe:</label>
-                    <input id="password" type="password" class="form-control" @bind="ConfirmPassword" placeholder="Mot de passe" />
+                    <label for="password">@Loc.T("settings.confirmPasswordPrompt")</label>
+                    <input id="password" type="password" class="form-control" @bind="ConfirmPassword" placeholder="@Loc.T("settings.currentPassword")" />
                 </div>
                 @if (!string.IsNullOrEmpty(ErrorMessage))
                 {
@@ -89,9 +96,9 @@
                 }
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" @onclick="() => { ShowConfirmModal = false; ConfirmPassword = string.Empty; ErrorMessage = string.Empty; }">Annuler</button>
+                <button class="btn btn-secondary" @onclick="() => { ShowConfirmModal = false; ConfirmPassword = string.Empty; ErrorMessage = string.Empty; }">@Loc.T("settings.cancelButton")</button>
                 <button class="btn btn-danger" @onclick="DeleteAccount" disabled="@IsDeleting">
-                    @if (IsDeleting) { <span>Suppression...</span> } else { <span>Supprimer définitivement</span> }
+                    @if (IsDeleting) { <span>@Loc.T("settings.deletingButton")</span> } else { <span>@Loc.T("settings.deleteConfirmButton")</span> }
                 </button>
             </div>
         </div>
@@ -394,6 +401,7 @@
     {
         CurrentUser = AuthService.GetCurrentUser();
         AuthService.OnAuthStateChanged += OnAuthChanged;
+        Loc.OnLanguageChanged += OnLanguageChanged;
     }
 
     private void OnAuthChanged()
@@ -402,9 +410,12 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private void OnLanguageChanged() => InvokeAsync(StateHasChanged);
+
     public void Dispose()
     {
         AuthService.OnAuthStateChanged -= OnAuthChanged;
+        Loc.OnLanguageChanged -= OnLanguageChanged;
     }
 
     private void ShowSettings()
@@ -419,17 +430,23 @@
         ChangePwdLoading = ChangePwdSuccess = false;
     }
 
+    private void GoToReference()
+    {
+        CloseSettings();
+        NavigationManager.NavigateTo("/reference");
+    }
+
     private async Task HandleChangePassword()
     {
         if (string.IsNullOrWhiteSpace(CurrentPassword) || string.IsNullOrWhiteSpace(NewPassword))
         {
-            ChangePwdMessage = "Tous les champs sont requis";
+            ChangePwdMessage = Loc.T("settings.allFieldsRequired");
             ChangePwdSuccess = false;
             return;
         }
         if (NewPassword != ConfirmNewPassword)
         {
-            ChangePwdMessage = "Les mots de passe ne correspondent pas";
+            ChangePwdMessage = Loc.T("settings.passwordMismatch");
             ChangePwdSuccess = false;
             return;
         }
@@ -439,7 +456,7 @@
         var (success, error) = await AuthService.ChangePasswordAsync(CurrentPassword, NewPassword);
         ChangePwdLoading = false;
         ChangePwdSuccess = success;
-        ChangePwdMessage = success ? "Mot de passe changé avec succès" : "Erreur : " + error.Trim('"');
+        ChangePwdMessage = success ? Loc.T("settings.changePasswordSuccess") : Loc.T("settings.changePasswordError") + error.Trim('"');
         if (success)
             CurrentPassword = NewPassword = ConfirmNewPassword = string.Empty;
     }
@@ -455,7 +472,7 @@
     {
         if (string.IsNullOrEmpty(ConfirmPassword))
         {
-            ErrorMessage = "Veuillez entrer votre mot de passe";
+            ErrorMessage = Loc.T("settings.passwordRequired");
             return;
         }
 
@@ -474,12 +491,12 @@
             }
             else
             {
-                ErrorMessage = "Mot de passe incorrect ou erreur lors de la suppression";
+                ErrorMessage = Loc.T("settings.deleteError");
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Erreur: {ex.Message}";
+            ErrorMessage = Loc.T("settings.unexpectedError") + ex.Message;
         }
         finally
         {

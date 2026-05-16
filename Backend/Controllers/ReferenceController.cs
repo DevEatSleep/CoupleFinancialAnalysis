@@ -1,5 +1,6 @@
 using CoupleChat.Models.Dto;
 using CoupleChat.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoupleChat.Controllers;
@@ -123,9 +124,8 @@ public class ReferenceController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DomestiqueStatisticsDto>>> GetStatistiques()
     {
-        // Aggregate all reference data by gender and activity
         var allData = await _domestiqueService.GetAllAsync();
-        
+
         var stats = allData
             .GroupBy(d => new { d.Sexe, d.Activite })
             .Select(g => new DomestiqueStatisticsDto
@@ -140,5 +140,29 @@ public class ReferenceController : ControllerBase
             .ToList();
 
         return Ok(stats);
+    }
+
+    [Authorize]
+    [HttpPut("travail-domestique/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<DomestiqueReferenceDto>> UpdateReference(int id, [FromBody] UpdateReferenceRequest request)
+    {
+        if (request.DureeMinutes < 0 || request.DureeMinutes > 1440)
+            return BadRequest("DureeMinutes must be between 0 and 1440.");
+
+        var result = await _domestiqueService.UpdateAsync(id, request.DureeMinutes);
+        if (result == null) return NotFound();
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("travail-domestique/reset")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<DomestiqueReferenceDto>>> ResetToDefaults()
+    {
+        var result = await _domestiqueService.ResetToDefaultsAsync();
+        return Ok(result);
     }
 }
