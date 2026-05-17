@@ -24,7 +24,8 @@
   },
   "person": {
     "woman": "woman",
-    "man": "man"
+    "man": "man",
+    "shared": "shared"
   },
   "chat": {
     "title": "💬 Chat",
@@ -141,6 +142,12 @@
     "score0": "🔴 Strong inequality detected. Review the distribution.",
     "howCalculated": "ℹ️ How is this calculated?",
     "financialGapExplain": "Financial gap: difference between each person's share of expenses and their share of combined income. 0 = each pays proportionally to their salary.",
-    "domesticGapExplain": "Domestic work gap: measures how far the declared household hours deviate from a 50/50 split. 0 = perfectly equal sharing. Domestic work valued at €11.88/h (French minimum wage)."
+    "domesticGapExplain": "Domestic work gap: measures how far the declared household hours deviate from a 50/50 split. 0 = perfectly equal sharing. Domestic work valued at €11.88/h (French minimum wage).",
+    "explainIntro": "Score = 100 − average gap · 100 = perfect equality · 0 = maximum inequality",
+    "explainSalaryShare": "Salary share (👩)",
+    "explainExpShare": "Expense share (👩)",
+    "explainHoursWoman": "👩 hours/month",
+    "explainHoursMan": "👨 hours/month",
+    "explainDomesticRate": "Domestic work valued at €11.88/h (French minimum wage)"
   }
 }

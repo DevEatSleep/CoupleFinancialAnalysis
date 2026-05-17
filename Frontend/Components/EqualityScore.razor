@@ -76,8 +76,45 @@ else
         </div>
         <details class="equality-details">
             <summary>@Loc.T("equality.howCalculated")</summary>
-            <p>@Loc.T("equality.financialGapExplain")</p>
-            <p>@Loc.T("equality.domesticGapExplain")</p>
+            <div class="explain-body">
+                <p class="explain-intro">@Loc.T("equality.explainIntro")</p>
+
+                @if (HasFinancial)
+                {
+                    <div class="explain-section">
+                        <strong>Δ @Loc.T("equality.financialGap")</strong>
+                        <div class="explain-formula">
+                            Δ = |@((WomanExp / TotalExp * 100).ToString("F1")) % − @((WomanSalary / TotalSalary * 100).ToString("F1")) %| = @DeltaFinancial.ToString("F1") pts
+                        </div>
+                        <ul class="explain-steps">
+                            <li>@Loc.T("equality.explainSalaryShare"): @WomanSalary.ToString("F0") / @TotalSalary.ToString("F0") = @((WomanSalary / TotalSalary * 100).ToString("F1")) %</li>
+                            <li>@Loc.T("equality.explainExpShare"): @WomanExp.ToString("F0") / @TotalExp.ToString("F0") = @((WomanExp / TotalExp * 100).ToString("F1")) %</li>
+                        </ul>
+                    </div>
+                }
+
+                @if (HasDomestic)
+                {
+                    <div class="explain-section">
+                        <strong>Δ @Loc.T("equality.domesticGap")</strong>
+                        <div class="explain-formula">
+                            Δ = |@((WomanHoursM / TotalHours * 100).ToString("F1")) % − 50 %| = @DeltaDomestic.ToString("F1") pts
+                        </div>
+                        <ul class="explain-steps">
+                            <li>@Loc.T("equality.explainHoursWoman"): @WomanHoursM.ToString("F1") h (@((WomanHoursM / TotalHours * 100).ToString("F1")) %)</li>
+                            <li>@Loc.T("equality.explainHoursMan"): @ManHoursM.ToString("F1") h (@((ManHoursM / TotalHours * 100).ToString("F1")) %)</li>
+                        </ul>
+                    </div>
+                }
+
+                <div class="explain-section">
+                    <div class="explain-formula">
+                        Score = 100 − (@DeltaFinancial.ToString("F1") + @DeltaDomestic.ToString("F1")) / @ComponentCount = @Score.ToString("F1")
+                    </div>
+                </div>
+
+                <p class="explain-rate">@Loc.T("equality.explainDomesticRate")</p>
+            </div>
         </details>
     </div>
 }

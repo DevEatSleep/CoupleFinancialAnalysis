@@ -94,7 +94,9 @@ public class BotService
     {
         _state.ClearChat();
         _state.CurrentPersonType = personType;
+        _state.CurrentUser = personType == SharedConstants.PersonTypes.Man ? "Person2" : "Person1";
         _state.DomestiqueMode = false;
+        _state.ExpenseMode = false;
         await AskNextQuestionAsync();
     }
 
@@ -102,6 +104,7 @@ public class BotService
     {
         _state.ClearChat();
         _state.CurrentPersonType = SharedConstants.PersonTypes.Woman;
+        _state.CurrentUser = "Person1";
         _state.DomestiqueMode = true;
         _domestiqueIndex = 0;
         System.Diagnostics.Debug.WriteLine("Starting woman domestique questions");
@@ -113,6 +116,7 @@ public class BotService
     {
         _state.ClearChat();
         _state.CurrentPersonType = SharedConstants.PersonTypes.Man;
+        _state.CurrentUser = "Person2";
         _state.DomestiqueMode = true;
         _domestiqueIndex = 0;
         System.Diagnostics.Debug.WriteLine("Starting man domestique questions");
@@ -307,10 +311,11 @@ public class BotService
                             return;
                         }
 
+                        var paidByDisplay = _loc.T("person." + _state.CurrentExpense.PaidBy);
                         var msg = _loc.T("bot.expenseRecorded")
                             .Replace("{label}", _state.CurrentExpense.Label)
                             .Replace("{amount}", _state.CurrentExpense.Amount.ToString())
-                            .Replace("{paidBy}", _state.CurrentExpense.PaidBy);
+                            .Replace("{paidBy}", paidByDisplay);
 
                         _state.AddChatMessage(_state.CurrentUser, response);
                         _state.AddChatMessage(Sender, msg);
