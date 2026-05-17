@@ -49,6 +49,17 @@ public class SurveyController : ControllerBase
             .Where(r => r.CoupleId == coupleId)
             .Select(r => r.QuestionId)
             .ToHashSet();
+
+        // Names are captured at registration — skip first-name questions automatically.
+        var coupleUsers = _context.Users
+            .Where(u => u.CoupleId == coupleId)
+            .OrderBy(u => u.Id)
+            .ToList();
+        if (coupleUsers.Count > 0 && !string.IsNullOrEmpty(coupleUsers[0].Name))
+            answered.Add(SharedConstants.QuestionIds.WomanFirstName);
+        if (coupleUsers.Count > 1 && !string.IsNullOrEmpty(coupleUsers[1].Name))
+            answered.Add(SharedConstants.QuestionIds.ManFirstName);
+
         var question = _botService.GetNextQuestionForPerson(person, answered, coupleId);
         if (question == null)
             return BadRequest($"No more questions available for {person}");

@@ -3,6 +3,8 @@ using CoupleChat.Models;
 using CoupleChat.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
+using SharedConstants = Shared.Constants;
 
 namespace CoupleChat.Controllers;
 
@@ -77,6 +79,29 @@ public class AuthController : ControllerBase
 
         await _context.SaveChangesAsync();
 
+        // Pre-save first-name responses so the survey never asks for them in chat.
+        _context.Responses.AddRange(
+            new Response
+            {
+                QuestionId = SharedConstants.QuestionIds.WomanFirstName,
+                QuestionText = "Prénom (Femme)",
+                UserResponse = request.Name1,
+                Category = SharedConstants.QuestionCategories.Personal,
+                Person = SharedConstants.PersonTypes.Woman,
+                CoupleId = couple.Id
+            },
+            new Response
+            {
+                QuestionId = SharedConstants.QuestionIds.ManFirstName,
+                QuestionText = "Prénom (Homme)",
+                UserResponse = request.Name2,
+                Category = SharedConstants.QuestionCategories.Personal,
+                Person = SharedConstants.PersonTypes.Man,
+                CoupleId = couple.Id
+            }
+        );
+        await _context.SaveChangesAsync();
+
         // Generate token
         var token = _jwtService.GenerateToken(user1.Id, couple.Id, user1.Email);
 
@@ -108,7 +133,12 @@ public class AuthController : ControllerBase
         // Get the couple's users to retrieve both names
         var coupleUsers = _context.Users.Where(u => u.CoupleId == user.CoupleId).OrderBy(u => u.Id).ToList();
         var womanName = coupleUsers.Count > 0 ? coupleUsers[0].Name : user.Name;
-        var manName = coupleUsers.Count > 1 ? coupleUsers[1].Name : user.Name;
+        var manName = coupleUsers.Count > 1
+            ? coupleUsers[1].Name
+            : _context.Responses
+                .Where(r => r.CoupleId == user.CoupleId && r.QuestionId == SharedConstants.QuestionIds.ManFirstName)
+                .Select(r => r.UserResponse)
+                .FirstOrDefault() ?? user.Name;
 
         // Generate token
         var token = _jwtService.GenerateToken(user.Id, user.CoupleId, user.Email);
@@ -144,7 +174,12 @@ public class AuthController : ControllerBase
 
         var coupleUsers = _context.Users.Where(u => u.CoupleId == coupleId).OrderBy(u => u.Id).ToList();
         var womanName = coupleUsers.Count > 0 ? coupleUsers[0].Name : user.Name;
-        var manName = coupleUsers.Count > 1 ? coupleUsers[1].Name : user.Name;
+        var manName = coupleUsers.Count > 1
+            ? coupleUsers[1].Name
+            : _context.Responses
+                .Where(r => r.CoupleId == coupleId && r.QuestionId == SharedConstants.QuestionIds.ManFirstName)
+                .Select(r => r.UserResponse)
+                .FirstOrDefault() ?? user.Name;
 
         var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
         return Ok(new AuthResponse

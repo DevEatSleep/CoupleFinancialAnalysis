@@ -40,15 +40,12 @@
                 <div class="settings-section">
                     <h3>@Loc.T("settings.changePasswordTitle")</h3>
                     <div class="form-group">
-                        <label>@Loc.T("settings.currentPassword")</label>
                         <input type="password" class="form-control" @bind="CurrentPassword" placeholder="@Loc.T("settings.currentPassword")" />
                     </div>
                     <div class="form-group">
-                        <label>@Loc.T("settings.newPassword")</label>
                         <input type="password" class="form-control" @bind="NewPassword" placeholder="@Loc.T("settings.newPassword")" />
                     </div>
                     <div class="form-group">
-                        <label>@Loc.T("settings.confirmPassword")</label>
                         <input type="password" class="form-control" @bind="ConfirmNewPassword" placeholder="@Loc.T("settings.confirmPassword")" />
                     </div>
                     @if (!string.IsNullOrEmpty(ChangePwdMessage))
@@ -69,7 +66,6 @@
                 <div class="settings-section danger-zone">
                     <h3>@Loc.T("settings.dangerZoneTitle")</h3>
                     <p>@Loc.T("settings.deleteWarning")</p>
-                    <br />
                     <button class="btn-delete-account" @onclick="ConfirmDelete">@Loc.T("settings.deleteButton")</button>
                 </div>
             </div>
@@ -210,7 +206,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem;
+        padding: 1rem 1.5rem;
         border-bottom: 1px solid #eee;
     }
 
@@ -232,7 +228,7 @@
     }
 
     .modal-body {
-        padding: 1.5rem;
+        padding: 1rem 1.5rem;
     }
 
     .modal-footer {
@@ -292,7 +288,7 @@
     }
 
     .form-group {
-        margin-bottom: 1rem;
+        margin-bottom: 0.6rem;
     }
 
     .form-group label {
@@ -351,14 +347,16 @@
 
     .settings-modal {
         max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .settings-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
 
     .settings-section h3 {
-        margin: 0 0 1rem;
+        margin: 0 0 0.6rem;
         font-size: 1rem;
         color: #333;
         padding-bottom: 0.5rem;
@@ -368,7 +366,7 @@
     .danger-zone {
         border: 1px solid #f5c6cb;
         border-radius: 6px;
-        padding: 1rem;
+        padding: 0.75rem;
         background: #fff5f5;
         margin-bottom: 0;
     }

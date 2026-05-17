@@ -24,7 +24,8 @@
   },
   "person": {
     "woman": "femme",
-    "man": "homme"
+    "man": "homme",
+    "shared": "les deux"
   },
   "chat": {
     "title": "💬 Chat",
@@ -141,6 +142,12 @@
     "score0": "🔴 Forte inégalité détectée. Revoyez la répartition.",
     "howCalculated": "ℹ️ Comment est-ce calculé ?",
     "financialGapExplain": "Écart financier : différence entre la part des dépenses de chaque personne et sa part dans le revenu total. 0 = chacun paie proportionnellement à son salaire.",
-    "domesticGapExplain": "Écart domestique : écart entre le partage déclaré des heures ménagères et un partage 50/50. 0 = partage parfaitement égal. Travail domestique valorisé à 11,88 €/h (SMIC horaire)."
+    "domesticGapExplain": "Écart domestique : écart entre le partage déclaré des heures ménagères et un partage 50/50. 0 = partage parfaitement égal. Travail domestique valorisé à 11,88 €/h (SMIC horaire).",
+    "explainIntro": "Score = 100 − écart moyen · 100 = égalité parfaite · 0 = inégalité maximale",
+    "explainSalaryShare": "Part du salaire (👩)",
+    "explainExpShare": "Part des dépenses (👩)",
+    "explainHoursWoman": "👩 heures/mois",
+    "explainHoursMan": "👨 heures/mois",
+    "explainDomesticRate": "Travail domestique valorisé à 11,88 €/h (SMIC horaire)"
   }
 }

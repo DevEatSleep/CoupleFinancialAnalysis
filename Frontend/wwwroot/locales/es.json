@@ -24,7 +24,8 @@
   },
   "person": {
     "woman": "mujer",
-    "man": "hombre"
+    "man": "hombre",
+    "shared": "ambos"
   },
   "chat": {
     "title": "💬 Chat",
@@ -141,6 +142,12 @@
     "score0": "🔴 Fuerte desigualdad detectada. Revisen el reparto.",
     "howCalculated": "ℹ️ ¿Cómo se calcula?",
     "financialGapExplain": "Diferencia financiera: diferencia entre la parte de los gastos de cada persona y su parte en el ingreso total. 0 = cada uno paga proporcionalmente a su salario.",
-    "domesticGapExplain": "Diferencia doméstica: mide cuánto se desvía el reparto declarado de horas domésticas del 50/50. 0 = reparto perfectamente igualitario. Trabajo doméstico valorado a 11,88 €/h (SMIC francés)."
+    "domesticGapExplain": "Diferencia doméstica: mide cuánto se desvía el reparto declarado de horas domésticas del 50/50. 0 = reparto perfectamente igualitario. Trabajo doméstico valorado a 11,88 €/h (SMIC francés).",
+    "explainIntro": "Puntuación = 100 − brecha promedio · 100 = igualdad perfecta · 0 = desigualdad máxima",
+    "explainSalaryShare": "Parte del salario (👩)",
+    "explainExpShare": "Parte de los gastos (👩)",
+    "explainHoursWoman": "👩 horas/mes",
+    "explainHoursMan": "👨 horas/mes",
+    "explainDomesticRate": "Trabajo doméstico valorado a 11,88 €/h (SMIC francés)"
   }
 }

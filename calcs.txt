@@ -1,0 +1,71 @@
+Two independent components
+The index combines at most two gaps, each worth 0–100 points:
+
+Component	What it measures
+ΔFinancial	Are expenses paid proportionally to each person's salary?
+ΔDomestic	Is household work split equally (50/50)?
+Final score = 100 − average of active gaps. 100 is perfect, 0 is maximum inequality.
+
+1. Financial gap (ΔFinancial)
+Question: Does each person's share of expenses match their share of total income?
+
+
+ΔFinancial = |woman's expense share − woman's salary share| × 100
+Shared expenses are split 50/50 before calculating.
+
+Example — Alice earns 2 000 €, Bob earns 3 000 €:
+
+Expense	Amount	Paid by
+Rent	1 200 €	Alice
+Food	600 €	Shared
+Internet	50 €	Bob
+Alice's effective expenses: 1 200 + 600/2 = 1 500 €
+Bob's effective expenses: 50 + 600/2 = 350 €
+Total expenses: 1 850 €
+Salary share of Alice: 2 000/5 000 = 40 %
+Expense share of Alice: 1 500/1 850 = 81 %
+
+→ ΔFinancial = |81 − 40| = 41 points (Alice pays far more than her income justifies)
+
+2. Domestic gap (ΔDomestic)
+Question: How far from a 50/50 split is the household work?
+
+Weekly hours are first converted to monthly (× 52/12 ≈ 4.33).
+
+
+ΔDomestic = |woman's share of total domestic hours − 50 %| × 100
+Example — same couple:
+
+Task	Alice (h/week)	Bob (h/week)
+Cooking & cleaning	10	3
+Childcare	5	2
+Groceries	3	0
+DIY / gardening	0	4
+Total	18	9
+Alice's share: 18/(18+9) = 66.7 %
+
+→ ΔDomestic = |66.7 − 50| = 16.7 points (Alice does two thirds of the work)
+
+3. Final score
+Both components are active in this example (salaries + expenses + domestic data entered).
+
+
+Score = 100 − (41 + 16.7) / 2 = 100 − 28.9 = 71.1 / 100
+→ 🟡 "Légère inégalité, quelques ajustements possibles."
+
+Perfect equality example
+Equal salaries (2 000 € each)
+All expenses shared 50/50
+Same domestic hours for both
+ΔFinancial = 0, ΔDomestic = 0 → Score = 100 / 100 ✅
+
+Combined contribution (informational, does not affect the score)
+This separate figure shows each person's net economic contribution to the household, adding the monetary value of domestic work (at 11.88 €/h, the French minimum wage):
+
+
+Contribution = Salary + (domestic hours/month × 11.88) − expenses paid
+Using the example above:
+
+Alice: 2 000 + (78 h × 11.88) − 1 500 = 1 427 €
+Bob: 3 000 + (39 h × 11.88) − 350 = 3 113 €
+This metric reflects who contributes more overall, counting both money and unpaid labour.
